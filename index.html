@@ -74,10 +74,14 @@ html,body{min-height:100%;background:#1a1a1a;font-family:-apple-system,BlinkMacS
 .cli:last-child{border-bottom:none}
 .cli-lbl{flex:1;font-size:13px;line-height:1.45;padding-right:6px}
 .cli-btns{display:flex;gap:4px;flex-shrink:0}
-.clb{padding:5px 9px;border-radius:6px;border:1.5px solid var(--bd);background:var(--cd);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit}
-.clb.conf{background:var(--gnl);border-color:#7bc46a;color:var(--gn)}
-.clb.nc{background:var(--rdl);border-color:#f4a9a9;color:var(--rd)}
-.clb.na{background:#f0f0ed;border-color:#bbb;color:#666}
+.clb{width:38px;height:38px;border-radius:50%;border:2px solid var(--bd);background:var(--cd);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.clb.conf{background:var(--gn);border-color:var(--gn);color:#fff;box-shadow:0 2px 8px rgba(52,168,83,.35)}
+.clb.nc{background:var(--rd);border-color:var(--rd);color:#fff;box-shadow:0 2px 8px rgba(220,53,69,.35)}
+.clb.na{background:#e9e9e9;border-color:#bbb;color:#888}
+.cli{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bd);cursor:default}
+.cli:last-child{border-bottom:none}
+.cli-lbl{flex:1;font-size:13px;line-height:1.4}
+.cli-btns{display:flex;gap:6px;flex-shrink:0}
 /* NC PANEL */
 .ncpanel{background:#fff8f8;border:1.5px solid #f4a9a9;border-radius:0 0 10px 10px;padding:12px;margin-bottom:8px}
 .ncpanel-title{font-size:11px;font-weight:700;color:var(--rd);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px}
@@ -254,13 +258,7 @@ html,body{min-height:100%;background:#1a1a1a;font-family:-apple-system,BlinkMacS
           <div class="ch"><span class="ct">Identificação</span><span class="badge bb" id="s1-tipo">—</span></div>
           <div class="cb"><div id="s1-info"></div></div>
         </div>
-        <div class="card">
-          <div class="ch"><span class="ct">Serviço solicitado</span></div>
-          <div class="cb">
-            <div id="s1-serv" style="font-size:14px;font-weight:700;line-height:1.5;margin-bottom:4px"></div>
-            <div id="s1-obs" style="font-size:12px;color:var(--mu);line-height:1.5"></div>
-          </div>
-        </div>
+        
         <button class="btn bp" onclick="ir('s2')">Próximo — Checklist →</button>
       </div>
     </div>
@@ -753,9 +751,9 @@ function renderChecklist(serv){
       const row=h('div','cli','');
       row.innerHTML=`<span class="cli-lbl">${prob}</span>
         <div class="cli-btns">
-          <button class="clb" id="b-conf-${k}" onclick="setCL('${k}','conf')">Conforme</button>
-          <button class="clb" id="b-nc-${k}" onclick="setCL('${k}','nc')">Não Conf.</button>
-          <button class="clb" id="b-na-${k}" onclick="setCL('${k}','na')">N/A</button>
+          <button class="clb" id="b-conf-${k}" onclick="setCL('${k}','conf')" title="Conforme">✓</button>
+          <button class="clb" id="b-nc-${k}" onclick="setCL('${k}','nc')" title="Não Conforme">✕</button>
+          <button class="clb" id="b-na-${k}" onclick="setCL('${k}','na')" title="Não se aplica">—</button>
         </div>`;
       wrap.appendChild(row);
       // Painel NC (oculto por padrão)
