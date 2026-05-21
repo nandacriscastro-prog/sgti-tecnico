@@ -647,16 +647,16 @@ function abrirOS(num){
   CL_EST={};
   // Reset campos
   ['sv-det','sv-sol','sv-pend-desc','adm-n','adm-d','adm-obs','me-rede','me-nb','me-24','me-5','me-emm'].forEach(id=>{const el=q(id);if(el)el.value='';});
-  q('sv-pend').value='nao';q('sv-pend-f').style.display='none';
-  q('sv-gar').value='90';q('sv-dias').value='0';q('sv-km').value='0';
-  q('sv-ini').value=new Date().toISOString().slice(0,16);
-  q('sv-fim').value='';
-  q('adm-dt').value=new Date().toISOString().slice(0,10);
+  if(q('sv-pend')) q('sv-pend').value='nao'; if(q('sv-pend-f')) q('sv-pend-f').style.display='none';
+  if(q('sv-gar')) q('sv-gar').value='90'; if(q('sv-dias')) q('sv-dias').value='0'; if(q('sv-km')) q('sv-km').value='0';
+  if(q('sv-ini')) q('sv-ini').value=new Date().toISOString().slice(0,16);
+  if(q('sv-fim')) q('sv-fim').value='';
+  if(q('adm-dt')) q('adm-dt').value=new Date().toISOString().slice(0,10);
   const o=OS_ATUAL;
   // Passo 1
-  q('s1-tipo').textContent=o.tipo||'—';
+  if(q('s1-tipo')) q('s1-tipo').textContent=o.tipo||'—';
   const prazo=calcPrazo(o);
-  q('s1-prazo').innerHTML=prazo?`<div class="prazo ${prazo.prazoClass}">${prazo.txt} · Prazo: ${prazo.dt.toLocaleDateString('pt-BR')}</div>`:'';
+  if(q('s1-prazo')) q('s1-prazo').innerHTML=prazo?`<div class="prazo ${prazo.prazoClass}">${prazo.txt} · Prazo: ${prazo.dt.toLocaleDateString('pt-BR')}</div>`:'';
   q('s1-info').innerHTML=[
     ['Comarca',o.comarca],['Fórum',o.forum],['Endereço',o.endereco],
     ['Telefone',o.telefone],['Contato',o.contato||'—'],
