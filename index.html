@@ -256,7 +256,11 @@ html,body{min-height:100%;background:#1a1a1a;font-family:-apple-system,BlinkMacS
         <div id="s1-prazo" style="margin-top:8px"></div>
         <div class="card" style="margin-top:0">
           <div class="ch"><span class="ct">Identificação</span><span class="badge bb" id="s1-tipo">—</span></div>
-          <div class="cb"><div id="s1-info"></div></div>
+          <div class="cb">
+            <div id="s1-info"></div>
+            <div id="s1-serv" style="font-size:13px;margin-top:8px;padding:8px 10px;background:var(--sf);border-radius:7px;color:var(--tx);line-height:1.5"></div>
+            <div id="s1-obs" style="font-size:12px;margin-top:6px;color:var(--mu)"></div>
+          </div>
         </div>
         
         <button class="btn bp" onclick="ir('s2')">Próximo — Checklist →</button>
@@ -662,10 +666,23 @@ function abrirOS(num){
     <span style="color:var(--mu);font-weight:600">${k}</span>
     <span style="text-align:right;max-width:60%">${vl||'—'}</span>
   </div>`).join('');
-  q('s1-serv').textContent=o.servico||'—';
-  q('s1-obs').textContent=o.observacoes?'Obs: '+o.observacoes:'';
-  if(o.status==='Reaberta'){
-    q('s1-obs').innerHTML+='<div style="background:var(--rdl);color:var(--rd);padding:8px 10px;border-radius:7px;font-size:12px;font-weight:600;margin-top:8px">⚠️ OS Reaberta — verifique o motivo nas observações.</div>';
+  if(q('s1-serv')) q('s1-serv').textContent=o.servico||'—';
+  // Adicionar serviço e observações no s1-info se s1-serv não existir
+  else {
+    const extraInfo = [];
+    if(o.servico) extraInfo.push(['Serviço',o.servico]);
+    if(o.observacoes) extraInfo.push(['Observações',o.observacoes]);
+    if(extraInfo.length && q('s1-info')) {
+      q('s1-info').innerHTML += extraInfo.map(([k,vl])=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--sf);font-size:13px"><span style="color:var(--mu);font-weight:600">${k}</span><span style="text-align:right;max-width:65%">${vl||'—'}</span></div>`).join('');
+    }
+  }
+  if(q('s1-obs')) {
+    q('s1-obs').textContent=o.observacoes?'Obs: '+o.observacoes:'';
+    if(o.status==='Reaberta'){
+      q('s1-obs').innerHTML+='<div style="background:var(--rdl);color:var(--rd);padding:8px 10px;border-radius:7px;font-size:12px;font-weight:600;margin-top:8px">⚠️ OS Reaberta — verifique o motivo nas observações.</div>';
+    }
+  } else if(o.status==='Reaberta' && q('s1-info')) {
+    q('s1-info').innerHTML+='<div style="background:var(--rdl);color:var(--rd);padding:8px 10px;border-radius:7px;font-size:12px;font-weight:600;margin-top:8px">⚠️ OS Reaberta — verifique o motivo nas observações.</div>';
   }
   // Renderizar checklist
   renderChecklist(o.servico||'');
@@ -1066,7 +1083,7 @@ function irPrevia(){
   const erros=validar();
   if(erros.length){
     // Mostrar erros na tela atual
-    const fe=q('s4-err')||q('fin-err');
+    const fe=q('s4-err')||q('s4-err');
     if(fe){fe.innerHTML='<strong>Corrija antes de prosseguir:</strong><br>'+erros.join('<br>');fe.style.display='block';}
     // Ir para o passo com erro
     if(erros.some(e=>e.includes('Checklist')||e.includes('foto')))ir('s2');
