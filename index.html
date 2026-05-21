@@ -1406,15 +1406,7 @@ function gerarRelatorioHTML(o,tecnico,ncs,confs,nas,pecas,fotosCount){
     ${temPend?`<div style="background:#FEF0DC;border-left:3px solid #e8b84b;padding:8px 10px;margin-top:8px;font-size:12px"><b>⚠️ Pendência registrada:</b> ${pendDesc}</div>`:''}
     <div style="margin-top:8px;font-size:12px;color:#555"><b>Prazo de garantia:</b> ${gar||'90'} dias a contar da conclusão do serviço.</div>`)}
 
-  ${med.rede||med.nb||med.v24||med.v5?SEC('Medições elétricas',`
-    <table style="border-collapse:collapse;font-size:12px">
-      <tr style="background:#f4f6fb"><th style="padding:5px 10px;border:1px solid #c8cdd8;text-align:left">Grandeza</th><th style="padding:5px 10px;border:1px solid #c8cdd8;text-align:center">Valor medido</th></tr>
-      ${med.rede?`<tr><td style="padding:5px 10px;border:1px solid #c8cdd8">Tensão rede</td><td style="padding:5px 10px;border:1px solid #c8cdd8;text-align:center">${med.rede} Vac</td></tr>`:''}
-      ${med.nb?`<tr><td style="padding:5px 10px;border:1px solid #c8cdd8">No-break</td><td style="padding:5px 10px;border:1px solid #c8cdd8;text-align:center">${med.nb} Vac</td></tr>`:''}
-      ${med.v24?`<tr><td style="padding:5px 10px;border:1px solid #c8cdd8">+24V</td><td style="padding:5px 10px;border:1px solid #c8cdd8;text-align:center">${med.v24} Vdc</td></tr>`:''}
-      ${med.v5?`<tr><td style="padding:5px 10px;border:1px solid #c8cdd8">+5V</td><td style="padding:5px 10px;border:1px solid #c8cdd8;text-align:center">${med.v5} Vdc</td></tr>`:''}
-      ${med.emm?`<tr><td style="padding:5px 10px;border:1px solid #c8cdd8">Instrumento utilizado</td><td style="padding:5px 10px;border:1px solid #c8cdd8;text-align:center">${med.emm}</td></tr>`:''}
-    </table>`):''}
+  ""
 
   ${pecas.length?SEC('Peças / componentes substituídos',`
     <table style="width:100%;border-collapse:collapse;font-size:12px">
