@@ -325,8 +325,8 @@ html,body{min-height:100%;background:#1a1a1a;font-family:-apple-system,BlinkMacS
           <div class="cb">
             <div class="fr">
               <div class="fld"><label>Início</label><input type="datetime-local" id="sv-ini"></div>
-              <div class="fld"><label>Término <small style="color:var(--gn);font-weight:700">auto</small></label>
-                <input type="datetime-local" id="sv-fim">
+              <div class="fld"><label>Término <small style="color:var(--gn);font-weight:700">preenchido ao enviar</small></label>
+                <input type="datetime-local" id="sv-fim" placeholder="Preenchido automaticamente">
               </div>
             </div>
             <div class="fr">
@@ -1064,9 +1064,9 @@ function validar(){
 function irPrevia(){
   // Registrar data/hora de término automaticamente
   const agora=new Date().toISOString().slice(0,16);
-  // Término preenchido pelo técnico manualmente
+  // Preencher término automaticamente ao avançar para prévia
   const fim=document.getElementById('sv-fim');
-  if(fim&&!fim.value)fim.value=agora; // só preenche se ainda vazio
+  if(fim&&!fim.value)fim.value=agora;
   const erros=validar();
   if(erros.length){
     // Mostrar erros na tela atual
@@ -1165,6 +1165,11 @@ function irPrevia(){
 
 /* ── FINALIZAR OS ── */
 async function finalizarOS(){
+  // Preencher término com hora atual se não preenchido
+  const svFim = document.getElementById('sv-fim');
+  if(svFim && !svFim.value) {
+    svFim.value = new Date().toISOString().slice(0,16);
+  }
   q('s4-err').style.display='none';
   const btn=q('btn-enviar');
   btn.innerHTML=spinner()+' Enviando...';btn.disabled=true;
