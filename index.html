@@ -302,7 +302,7 @@ html,body{min-height:100%;background:#1a1a1a;font-family:-apple-system,BlinkMacS
             <div id="sv-pend-f" style="display:none" class="fld"><label>Descrição das pendências</label><textarea id="sv-pend-desc"></textarea></div>
           </div>
         </div>
-        <button class="btn bp" onclick="const _t=detectarTipo(OS_ATUAL?.servico||'');if(_t.includes('CFTV')){const _i=[...document.querySelectorAll('.ip-inp')].filter(e=>e.value.trim());if(!_i.length){const bl=document.getElementById('ip-bloco');if(bl){bl.style.border='2px solid var(--rd)';bl.scrollIntoView({behavior:'smooth',block:'center'});}toast('⚠️ Informe pelo menos 1 IP (obrigatório para CFTV)','error');return;}}ir('s3');">Próximo — Período e responsável →</button>
+        <button class="btn bp" onclick="var _t=detectarTipo(OS_ATUAL&&OS_ATUAL.servico||'');if(_t.includes('CFTV')){var _i=document.querySelectorAll('.ip-inp');var _ok=false;for(var _x=0;_x<_i.length;_x++){if(_i[_x].value.trim()){_ok=true;break;}}if(!_ok){var bl=document.getElementById('ip-bloco');if(bl){bl.style.border='2px solid var(--rd)';bl.scrollIntoView({behavior:'smooth',block:'center'});}toast('Informe pelo menos 1 IP (obrigatorio para CFTV)','error');return;}}ir('s3');">Próximo — Período e responsável →</button>
       </div>
     </div>
 
@@ -329,10 +329,7 @@ html,body{min-height:100%;background:#1a1a1a;font-family:-apple-system,BlinkMacS
                 <input type="datetime-local" id="sv-fim" placeholder="Preenchido automaticamente">
               </div>
             </div>
-            <div style="background:var(--sf);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--mu);margin-top:4px">
-              ℹ️ <strong>Diárias</strong> calculadas automaticamente pelo sistema (Anexo IV).<br>
-              📍 <strong>KM</strong> informado pela fiscalização no fechamento.
-            </div>
+            <div style="background:var(--sf);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--mu);margin-top:4px">&#8505;&#65039; <strong>Di&aacute;rias</strong> calculadas automaticamente (Anexo IV).<br>&#128205; <strong>KM</strong> informado pela fiscaliza&ccedil;&atilde;o no fechamento.</div>
             <input type="hidden" id="sv-dias" value="0">
             <input type="hidden" id="sv-km" value="0">
           </div>
@@ -777,22 +774,95 @@ function renderChecklist(serv){
   if(tipos.includes('CFTV')){
     const ipCard=h('div','card','');
     ipCard.style.cssText='margin-bottom:10px;border:2px solid var(--pr)';
-    ipCard.innerHTML=`<div class="ch"><span class="ct" style="color:var(--pr)">🌐 IPs registrados na comarca</span><span class="badge" style="background:var(--pr);color:white">CFTV — obrigatório</span></div><div class="cb" id="ip-bloco"><p style="font-size:12px;color:var(--mu);margin-bottom:10px">Informe todos os IPs configurados (DVR, câmeras, etc.)</p><div id="ip-lista"><div class="ip-row" style="display:flex;gap:8px;margin-bottom:8px"><input class="ip-inp" type="text" placeholder="Ex: 192.168.1.100" style="flex:1;font-family:monospace" oninput="atualizarResumoIPs()"><input class="ip-desc" type="text" placeholder="DVR, câmera 1..." style="flex:1" oninput="atualizarResumoIPs()"></div></div><button onclick="adicionarLinhaIP()" style="width:100%;background:var(--sf);border:1.5px dashed var(--pr);color:var(--pr);border-radius:6px;padding:8px;cursor:pointer;font-size:13px;font-weight:600;margin-top:4px">+ Adicionar IP</button><div style="margin-top:14px;border-top:1px solid var(--bd);padding-top:12px"><p style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px">IP foi alterado?</p><div style="display:flex;gap:8px;margin-bottom:8px"><button id="ip-alt-nao" onclick="setIPAlterado(false)" style="flex:1;padding:10px;border-radius:6px;border:2px solid var(--gn);background:#f0fdf4;font-weight:600;cursor:pointer">✓ Não alterado</button><button id="ip-alt-sim" onclick="setIPAlterado(true)" style="flex:1;padding:10px;border-radius:6px;border:2px solid var(--bd);background:var(--sf);font-weight:600;cursor:pointer">⚠️ Sim, alterado</button></div><div id="ip-alt-bloco" style="display:none"><p style="font-size:12px;color:var(--mu);margin-bottom:6px">IP anterior → IP novo:</p><div id="ip-alt-lista"><div class="ip-alt-row" style="display:flex;gap:6px;margin-bottom:6px;align-items:center"><input class="ip-ant" type="text" placeholder="IP anterior" style="flex:1;font-family:monospace" oninput="atualizarResumoIPs()"><span style="color:var(--mu)">→</span><input class="ip-novo-alt" type="text" placeholder="IP novo" style="flex:1;font-family:monospace" oninput="atualizarResumoIPs()"><input class="ip-alt-desc" type="text" placeholder="Equipamento" style="flex:1" oninput="atualizarResumoIPs()"></div></div><button onclick="adicionarLinhaIPAlt()" style="width:100%;background:var(--sf);border:1.5px dashed var(--am);color:var(--am);border-radius:6px;padding:7px;cursor:pointer;font-size:12px;font-weight:600;margin-top:4px">+ Mais alteração</button></div></div><div id="ip-resumo" style="display:none;margin-top:10px;background:var(--sf);border-radius:6px;padding:10px;font-size:12px;font-family:monospace;white-space:pre-line;line-height:1.7"></div></div>`;
+    const ipHdr=h('div','ch','');
+    ipHdr.innerHTML='<span class="ct" style="color:var(--pr)">&#127758; IPs registrados na comarca</span><span class="badge" style="background:var(--pr);color:white">CFTV &mdash; obrigat&oacute;rio</span>';
+    const ipBody=h('div','cb','');
+    ipBody.id='ip-bloco';
+    ipBody.innerHTML='<p style="font-size:12px;color:var(--mu);margin-bottom:10px">Informe todos os IPs configurados (DVR, c&acirc;meras, etc.)</p>'+
+      '<div id="ip-lista"><div class="ip-row" style="display:flex;gap:8px;margin-bottom:8px">'+
+      '<input class="ip-inp" type="text" placeholder="Ex: 192.168.1.100" style="flex:1;font-family:monospace" oninput="atualizarResumoIPs()">'+
+      '<input class="ip-desc" type="text" placeholder="DVR, c&acirc;mera 1..." style="flex:1" oninput="atualizarResumoIPs()">'+
+      '</div></div>'+
+      '<button onclick="adicionarLinhaIP()" style="width:100%;background:var(--sf);border:1.5px dashed var(--pr);color:var(--pr);border-radius:6px;padding:8px;cursor:pointer;font-size:13px;font-weight:600;margin-top:4px">+ Adicionar IP</button>'+
+      '<div style="margin-top:14px;border-top:1px solid var(--bd);padding-top:12px">'+
+      '<p style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px">IP foi alterado?</p>'+
+      '<div style="display:flex;gap:8px;margin-bottom:8px">'+
+      '<button id="ip-alt-nao" onclick="setIPAlterado(false)" style="flex:1;padding:10px;border-radius:6px;border:2px solid var(--gn);background:#f0fdf4;font-weight:600;cursor:pointer">&#10003; N&atilde;o alterado</button>'+
+      '<button id="ip-alt-sim" onclick="setIPAlterado(true)" style="flex:1;padding:10px;border-radius:6px;border:2px solid var(--bd);background:var(--sf);font-weight:600;cursor:pointer">&#9888;&#65039; Sim, alterado</button>'+
+      '</div>'+
+      '<div id="ip-alt-bloco" style="display:none">'+
+      '<p style="font-size:12px;color:var(--mu);margin-bottom:6px">IP anterior &rarr; IP novo:</p>'+
+      '<div id="ip-alt-lista"><div class="ip-alt-row" style="display:flex;gap:6px;margin-bottom:6px;align-items:center">'+
+      '<input class="ip-ant" type="text" placeholder="IP anterior" style="flex:1;font-family:monospace" oninput="atualizarResumoIPs()">'+
+      '<span style="color:var(--mu)">&rarr;</span>'+
+      '<input class="ip-novo-alt" type="text" placeholder="IP novo" style="flex:1;font-family:monospace" oninput="atualizarResumoIPs()">'+
+      '<input class="ip-alt-desc" type="text" placeholder="Equipamento" style="flex:1" oninput="atualizarResumoIPs()">'+
+      '</div></div>'+
+      '<button onclick="adicionarLinhaIPAlt()" style="width:100%;background:var(--sf);border:1.5px dashed var(--am);color:var(--am);border-radius:6px;padding:7px;cursor:pointer;font-size:12px;font-weight:600;margin-top:4px">+ Mais altera&ccedil;&atilde;o</button>'+
+      '</div></div>'+
+      '<div id="ip-resumo" style="display:none;margin-top:10px;background:var(--sf);border-radius:6px;padding:10px;font-size:12px;font-family:monospace;white-space:pre-line;line-height:1.7"></div>';
+    ipCard.appendChild(ipHdr);
+    ipCard.appendChild(ipBody);
     cont.appendChild(ipCard);
     window._ipAlterado=false;
   }
 }
-function adicionarLinhaIP(){const lista=document.getElementById('ip-lista');if(!lista)return;const row=document.createElement('div');row.className='ip-row';row.style.cssText='display:flex;gap:8px;margin-bottom:8px';row.innerHTML=`<input class="ip-inp" type="text" placeholder="Ex: 192.168.1.100" style="flex:1;font-family:monospace" oninput="atualizarResumoIPs()"><input class="ip-desc" type="text" placeholder="DVR, câmera 1..." style="flex:1" oninput="atualizarResumoIPs()"><button onclick="this.parentElement.remove();atualizarResumoIPs()" style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:18px">✕</button>`;lista.appendChild(row);}
-function adicionarLinhaIPAlt(){const lista=document.getElementById('ip-alt-lista');if(!lista)return;const row=document.createElement('div');row.className='ip-alt-row';row.style.cssText='display:flex;gap:6px;margin-bottom:6px;align-items:center';row.innerHTML=`<input class="ip-ant" type="text" placeholder="IP anterior" style="flex:1;font-family:monospace" oninput="atualizarResumoIPs()"><span style="color:var(--mu)">→</span><input class="ip-novo-alt" type="text" placeholder="IP novo" style="flex:1;font-family:monospace" oninput="atualizarResumoIPs()"><input class="ip-alt-desc" type="text" placeholder="Equipamento" style="flex:1" oninput="atualizarResumoIPs()"><button onclick="this.parentElement.remove();atualizarResumoIPs()" style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:18px">✕</button>`;lista.appendChild(row);}
-function setIPAlterado(sim){window._ipAlterado=sim;const b=document.getElementById('ip-alt-bloco');if(b)b.style.display=sim?'block':'none';const bs=document.getElementById('ip-alt-sim');const bn=document.getElementById('ip-alt-nao');if(bs){bs.style.border=sim?'2px solid var(--am)':'2px solid var(--bd)';bs.style.background=sim?'#fffbeb':'var(--sf)';}if(bn){bn.style.border=!sim?'2px solid var(--gn)':'2px solid var(--bd)';bn.style.background=!sim?'#f0fdf4':'var(--sf)';}atualizarResumoIPs();}
-function atualizarResumoIPs(){const r=document.getElementById('ip-resumo');if(!r)return;const ips=[...document.querySelectorAll('.ip-inp')].map((el,i)=>{const d=document.querySelectorAll('.ip-desc')[i]?.value||'';return el.value.trim()?`• ${el.value.trim()}${d?' ('+d+')':''}`:null;}).filter(Boolean);let txt=ips.length?'IPs registrados:
-'+ips.join('
-'):'';if(window._ipAlterado){const alts=[...document.querySelectorAll('.ip-alt-row')].map(row=>{const a=row.querySelector('.ip-ant')?.value||'';const n=row.querySelector('.ip-novo-alt')?.value||'';const d=row.querySelector('.ip-alt-desc')?.value||'';return a||n?`  ${a||'?'} → ${n||'?'}${d?' ('+d+')':''}`:null;}).filter(Boolean);if(alts.length)txt+=(txt?'
-
-':'')+'IPs alterados:
-'+alts.join('
-');}r.style.display=txt?'block':'none';r.textContent=txt;window._ipsResumo=txt;}
-function getIPsData(){const ips=[...document.querySelectorAll('.ip-inp')].map((el,i)=>{const d=document.querySelectorAll('.ip-desc')[i]?.value?.trim()||'';return el.value.trim()?{ip:el.value.trim(),desc:d}:null;}).filter(Boolean);if(!ips.length)return null;const alt=window._ipAlterado?[...document.querySelectorAll('.ip-alt-row')].map(r=>({anterior:r.querySelector('.ip-ant')?.value?.trim()||'',novo:r.querySelector('.ip-novo-alt')?.value?.trim()||'',desc:r.querySelector('.ip-alt-desc')?.value?.trim()||''})).filter(a=>a.anterior||a.novo):[];return{ips,alterado:window._ipAlterado||false,alteracoes:alt,resumo:window._ipsResumo||''};}
+function adicionarLinhaIP(){
+  var lista=document.getElementById('ip-lista');if(!lista)return;
+  var row=document.createElement('div');row.className='ip-row';
+  row.style.cssText='display:flex;gap:8px;margin-bottom:8px';
+  var i1=document.createElement('input');i1.className='ip-inp';i1.type='text';i1.placeholder='Ex: 192.168.1.100';i1.style.cssText='flex:1;font-family:monospace';i1.oninput=atualizarResumoIPs;
+  var i2=document.createElement('input');i2.className='ip-desc';i2.type='text';i2.placeholder='Descricao';i2.style.flex='1';i2.oninput=atualizarResumoIPs;
+  var bt=document.createElement('button');bt.innerHTML='&#10005;';bt.style.cssText='background:none;border:none;color:var(--rd);cursor:pointer;font-size:18px';bt.onclick=function(){this.parentElement.remove();atualizarResumoIPs();};
+  row.appendChild(i1);row.appendChild(i2);row.appendChild(bt);lista.appendChild(row);
+}
+function adicionarLinhaIPAlt(){
+  var lista=document.getElementById('ip-alt-lista');if(!lista)return;
+  var row=document.createElement('div');row.className='ip-alt-row';
+  row.style.cssText='display:flex;gap:6px;margin-bottom:6px;align-items:center';
+  var a=document.createElement('input');a.className='ip-ant';a.type='text';a.placeholder='IP anterior';a.style.cssText='flex:1;font-family:monospace';a.oninput=atualizarResumoIPs;
+  var sp=document.createElement('span');sp.innerHTML='&rarr;';sp.style.color='var(--mu)';
+  var n=document.createElement('input');n.className='ip-novo-alt';n.type='text';n.placeholder='IP novo';n.style.cssText='flex:1;font-family:monospace';n.oninput=atualizarResumoIPs;
+  var d=document.createElement('input');d.className='ip-alt-desc';d.type='text';d.placeholder='Equipamento';d.style.flex='1';d.oninput=atualizarResumoIPs;
+  var bt=document.createElement('button');bt.innerHTML='&#10005;';bt.style.cssText='background:none;border:none;color:var(--rd);cursor:pointer;font-size:18px';bt.onclick=function(){this.parentElement.remove();atualizarResumoIPs();};
+  row.appendChild(a);row.appendChild(sp);row.appendChild(n);row.appendChild(d);row.appendChild(bt);lista.appendChild(row);
+}
+function setIPAlterado(sim){
+  window._ipAlterado=sim;
+  var b=document.getElementById('ip-alt-bloco');if(b)b.style.display=sim?'block':'none';
+  var bs=document.getElementById('ip-alt-sim');var bn=document.getElementById('ip-alt-nao');
+  if(bs){bs.style.border=sim?'2px solid var(--am)':'2px solid var(--bd)';bs.style.background=sim?'#fffbeb':'var(--sf)';}
+  if(bn){bn.style.border=!sim?'2px solid var(--gn)':'2px solid var(--bd)';bn.style.background=!sim?'#f0fdf4':'var(--sf)';}
+  atualizarResumoIPs();
+}
+function atualizarResumoIPs(){
+  var resumo=document.getElementById('ip-resumo');if(!resumo)return;
+  var inps=document.querySelectorAll('.ip-inp');
+  var descs=document.querySelectorAll('.ip-desc');
+  var ips=[];
+  for(var i=0;i<inps.length;i++){if(inps[i].value.trim()){ips.push('* '+inps[i].value.trim()+(descs[i]&&descs[i].value?' ('+descs[i].value+')':''));}}
+  var txt=ips.length?'IPs registrados:\n'+ips.join('\n'):'';
+  if(window._ipAlterado){
+    var rows=document.querySelectorAll('.ip-alt-row');var alts=[];
+    for(var j=0;j<rows.length;j++){
+      var ant=rows[j].querySelector('.ip-ant');var nov=rows[j].querySelector('.ip-novo-alt');var desc=rows[j].querySelector('.ip-alt-desc');
+      if((ant&&ant.value)||(nov&&nov.value)){alts.push('  '+(ant?ant.value:'?')+' -> '+(nov?nov.value:'?')+(desc&&desc.value?' ('+desc.value+')':''));}
+    }
+    if(alts.length)txt+=(txt?'\n\n':'')+'IPs alterados:\n'+alts.join('\n');
+  }
+  resumo.style.display=txt?'block':'none';
+  resumo.textContent=txt.replace(/\\n/g,'\n');
+  window._ipsResumo=txt;
+}
+function getIPsData(){
+  var inps=document.querySelectorAll('.ip-inp');var descs=document.querySelectorAll('.ip-desc');
+  var ips=[];
+  for(var i=0;i<inps.length;i++){if(inps[i].value.trim()){ips.push({ip:inps[i].value.trim(),desc:descs[i]?descs[i].value.trim():''});}}
+  if(!ips.length)return null;
+  var rows=document.querySelectorAll('.ip-alt-row');var alt=[];
+  if(window._ipAlterado){for(var j=0;j<rows.length;j++){var a2=rows[j].querySelector('.ip-ant');var n2=rows[j].querySelector('.ip-novo-alt');var d2=rows[j].querySelector('.ip-alt-desc');if((a2&&a2.value)||(n2&&n2.value)){alt.push({anterior:a2?a2.value.trim():'',novo:n2?n2.value.trim():'',desc:d2?d2.value.trim():''});}}}
+  return{ips:ips,alterado:window._ipAlterado||false,alteracoes:alt,resumo:window._ipsResumo||''};
+}
 function setCL(k,v){
   CL_EST[k]=CL_EST[k]===v?null:v;
   const estado=CL_EST[k];
@@ -1215,14 +1285,14 @@ async function finalizarOS(){
     });
     const totalFotos=Object.values(fotosCount).reduce((a,b)=>a+b,0);
     const relatorioHTML=gerarRelatorioHTML(o,emailTec,ncs,confs,nas,pecas,fotosCount);
-    // Calcular diárias automaticamente pelas frações do Anexo IV
-    const FRAC_DIAS={'3.1.1':0.125,'3.1.2':0.25,'3.1.3':0.375,'3.1.4':0.25,'3.1.5':0.125,'3.1.6':0.125,'3.1.7':0.125,'3.1.8':0.25,'3.1.9':0.25,'3.1.10':0.125,'3.1.11':0.125,'3.1.12':0.125,'3.1.13':0.375,'3.2.1':0.125,'3.2.2':0.125,'3.2.3':0.125,'3.2.4':0.125,'3.2.5':0.125,'3.2.6':0.125,'3.3.1':0.125,'3.3.2':0.125,'3.4':0.188,'3.5.1':0.125,'3.5.2':0.125,'3.5.3':0.125,'3.5.4':0.125,'3.5.5':0.125,'3.5.6':0.125,'3.5.7':0.125,'3.5.8':0.125,'3.6.1':1.0,'3.6.2':1.0,'3.6.3':1.0,'3.6.4':0.00417,'3.7.1':0.125,'3.7.2':0.125,'3.7.3':0.125,'3.7.4':0.125,'3.8.1':0.125,'3.8.2':0.125,'3.8.3':0.125,'3.8.4':0.125,'3.8.5':0.125,'3.8.6':0.125,'3.8.7':0.125,'3.9.1':0.125,'3.9.2':0.125,'3.9.3':0.125,'3.9.4':0.125,'3.9.5':0.25,'3.9.6':0.25,'3.9.7':0.5,'3.9.8':0.25,'3.10':0.75};
-    const s_tipo=(OS_ATUAL?.servico||OS_ATUAL?.tipo||'').toLowerCase();
-    let _frac=s_tipo.includes('raio')||s_tipo.includes('scanner')?1.25:1.0;
-    document.querySelectorAll('.peca-card').forEach(pc=>{const cod=(pc.querySelector('.pc-sel')?.value||'').split('|')[0].trim();const qtd=parseFloat(pc.querySelector('.pc-qtd')?.value||1)||1;if(FRAC_DIAS[cod])_frac+=FRAC_DIAS[cod]*qtd;});
-    const _diasCalc=Math.round(_frac*1000)/1000;
+    var FRAC_DIAS={'3.1.1':0.125,'3.1.2':0.25,'3.1.3':0.375,'3.1.4':0.25,'3.1.5':0.125,'3.1.6':0.125,'3.1.7':0.125,'3.1.8':0.25,'3.1.9':0.25,'3.1.10':0.125,'3.1.11':0.125,'3.1.12':0.125,'3.1.13':0.375,'3.2.1':0.125,'3.2.2':0.125,'3.2.3':0.125,'3.2.4':0.125,'3.2.5':0.125,'3.2.6':0.125,'3.3.1':0.125,'3.3.2':0.125,'3.4':0.188,'3.5.1':0.125,'3.5.2':0.125,'3.5.3':0.125,'3.5.4':0.125,'3.5.5':0.125,'3.5.6':0.125,'3.5.7':0.125,'3.5.8':0.125,'3.6.1':1.0,'3.6.2':1.0,'3.6.3':1.0,'3.6.4':0.00417,'3.7.1':0.125,'3.7.2':0.125,'3.7.3':0.125,'3.7.4':0.125,'3.8.1':0.125,'3.8.2':0.125,'3.8.3':0.125,'3.8.4':0.125,'3.8.5':0.125,'3.8.6':0.125,'3.8.7':0.125,'3.9.1':0.125,'3.9.2':0.125,'3.9.3':0.125,'3.9.4':0.125,'3.9.5':0.25,'3.9.6':0.25,'3.9.7':0.5,'3.9.8':0.25,'3.10':0.75};
+    var s_tp=(OS_ATUAL&&OS_ATUAL.servico||OS_ATUAL&&OS_ATUAL.tipo||'').toLowerCase();
+    var _frac=s_tp.indexOf('raio')>=0||s_tp.indexOf('scanner')>=0?1.25:1.0;
+    var _pecas=document.querySelectorAll('.peca-card');
+    for(var _pi=0;_pi<_pecas.length;_pi++){var _cod=(_pecas[_pi].querySelector('.pc-sel')&&_pecas[_pi].querySelector('.pc-sel').value||'').split('|')[0].trim();var _qtd=parseFloat(_pecas[_pi].querySelector('.pc-qtd')&&_pecas[_pi].querySelector('.pc-qtd').value||1)||1;if(FRAC_DIAS[_cod])_frac+=FRAC_DIAS[_cod]*_qtd;}
+    var _diasCalc=Math.round(_frac*1000)/1000;
     document.getElementById('sv-dias').value=_diasCalc;
-    const ipsData=typeof getIPsData==='function'?getIPsData():null;
+    var ipsData=typeof getIPsData==='function'?getIPsData():null;
     const retorno={
       tecnico:emailTec,
       ips_cftv:ipsData,
