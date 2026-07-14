@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GEASI Téc.">
 <meta name="theme-color" content="#0f2744">
-<title>GEASI — Técnico</title><!-- build:1784056614 -->
+<title>GEASI — Técnico</title><!-- build:1784056774 -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -222,6 +222,7 @@ html,body{min-height:100%;background:#0f1f12;font-family:-apple-system,BlinkMacS
         <div class="sb" style="border-left:2px solid var(--am)"><div class="sn" id="st-rd" style="color:var(--am)">0</div><div class="sl2">Reabertas</div></div>
       </div>
       <button class="btn bp" onclick="ir('os')">📋 Ver OS abertas</button>
+      <div id="home-rascunhos"></div>
       <button class="btn bo" onclick="ir('hist')">✅ Histórico concluídas</button>
       <button class="btn bo" onclick="doLogout()" style="color:var(--rd);border-color:var(--rdl)">Sair</button>
     </div>
@@ -575,6 +576,25 @@ function atualizarStats(){
   q('st-urg').textContent=OS_ATIVAS.filter(o=>o.prioridade?.includes('P0')||o.prioridade?.includes('P1')).length;
   q('st-co').textContent=OS_CONC.length;
   q('st-rd').textContent=OS_ATIVAS.filter(o=>o.status==='Reaberta').length;
+  renderRascunhosHome();
+}
+function renderRascunhosHome(){
+  const cont=q('home-rascunhos');
+  if(!cont)return;
+  const emAndamento=OS_ATIVAS.filter(o=>!!localStorage.getItem('rascunho_'+o.numero));
+  if(!emAndamento.length){cont.innerHTML='';return;}
+  cont.innerHTML=`<div class="card" style="border:1.5px solid var(--am);background:#fffaf0;margin-bottom:10px">
+    <div class="ch"><span class="ct">✏️ Em andamento (${emAndamento.length})</span></div>
+    <div class="cb">${emAndamento.map(o=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)">
+        <div>
+          <div style="font-weight:700;font-size:13px">OS ${o.numero}</div>
+          <div style="font-size:11px;color:var(--mu)">${o.comarca||'—'} · ${(o.servico||'').substring(0,40)}</div>
+        </div>
+        <button class="bsm" style="background:var(--am);color:#fff;border:none;border-radius:7px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer" onclick="abrirOS('${o.numero}', true)">Continuar</button>
+      </div>`).join('')}
+    </div>
+  </div>`;
 }
 
 function calcPrazo(o){
@@ -661,7 +681,7 @@ function renderHist(){
 }
 
 /* ── ABRIR OS ── */
-function abrirOS(num){
+function abrirOS(num, resumirDireto){
   OS_ATUAL=OS_ATIVAS.find(o=>o.numero===num);
   if(!OS_ATUAL)return;
   CL_EST={};
@@ -709,10 +729,14 @@ function abrirOS(num){
   // Verificar rascunho
   const temRasc=!!localStorage.getItem('rascunho_'+num);
   if(temRasc){
-    setTimeout(()=>{
-      if(confirm('Existe um rascunho salvo para esta OS. Continuar de onde parou?')){carregarRascunho();}
-      else localStorage.removeItem('rascunho_'+num);
-    },300);
+    if(resumirDireto){
+      setTimeout(()=>{carregarRascunho();},300);
+    } else {
+      setTimeout(()=>{
+        if(confirm('Existe um rascunho salvo para esta OS. Continuar de onde parou?')){carregarRascunho();}
+        else localStorage.removeItem('rascunho_'+num);
+      },300);
+    }
   }
   ir('s1');
 }
