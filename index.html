@@ -330,8 +330,8 @@ html,body{min-height:100%;background:#1a1a1a;font-family:-apple-system,BlinkMacS
               </div>
             </div>
             <div style="background:var(--sf);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--mu);margin-top:4px">
-              ℹ️ <strong>Diárias</strong> calculadas automaticamente pelo sistema conforme itens do Anexo IV.<br>
-              📍 <strong>KM</strong> informado pela fiscalização no fechamento do mês.
+              ℹ️ <strong>Diárias</strong> calculadas automaticamente pelo sistema.<br>
+              📍 <strong>KM</strong> definido pela fiscalização no fechamento do mês.
             </div>
             <input type="hidden" id="sv-dias" value="0">
             <input type="hidden" id="sv-km" value="0">
@@ -1215,26 +1215,14 @@ async function finalizarOS(){
     });
     const totalFotos=Object.values(fotosCount).reduce((a,b)=>a+b,0);
     const relatorioHTML=gerarRelatorioHTML(o,emailTec,ncs,confs,nas,pecas,fotosCount);
-    const ipsData=typeof getIPsData==='function'?getIPsData():null;
-    const retorno={
-      tecnico:emailTec,
-      ips_cftv:ipsData,
-      dtconc:v('sv-ini')?.slice(0,10)||new Date().toISOString().slice(0,10),
-      hora:v('sv-fim')?.slice(11,16)||v('sv-ini')?.slice(11,16)||'',
-      servicos:v('sv-det'),solucao:v('sv-sol'),
-      pendencias:v('sv-pend'),pend_desc:v('sv-pend-desc'),
-      
-    // Calcular diárias automaticamente com base no tipo de OS e itens instalados
+    // Calcular diárias automaticamente (Anexo IV — frações por item)
     const calcDiarias = () => {
       const s = (OS_ATUAL?.servico||OS_ATUAL?.tipo||'').toLowerCase();
       let frac = 0;
-      // Fração base pelo tipo de atendimento (itens 2.1, 2.2, 2.3)
       if(s.includes('raio')||s.includes('scanner')) frac = 1.25;
       else if(s.includes('portal')||s.includes('detector')) frac = 1.0;
-      else frac = 1.0; // alarme, cftv, acesso
-      // Somar frações dos itens de peças instaladas (Anexo V)
-      const FRAC_ITEM = {
-        '3.1.1':0.125,'3.1.2':0.25,'3.1.3':0.375,'3.1.4':0.25,
+      else frac = 1.0;
+      const FRAC = {'3.1.1':0.125,'3.1.2':0.25,'3.1.3':0.375,'3.1.4':0.25,
         '3.1.5':0.125,'3.1.6':0.125,'3.1.7':0.125,'3.1.8':0.25,
         '3.1.9':0.25,'3.1.10':0.125,'3.1.11':0.125,'3.1.12':0.125,
         '3.1.13':0.375,'3.2.1':0.125,'3.2.2':0.125,'3.2.3':0.125,
@@ -1247,18 +1235,22 @@ async function finalizarOS(){
         '3.8.3':0.125,'3.8.4':0.125,'3.8.5':0.125,'3.8.6':0.125,
         '3.8.7':0.125,'3.9.1':0.125,'3.9.2':0.125,'3.9.3':0.125,
         '3.9.4':0.125,'3.9.5':0.25,'3.9.6':0.25,'3.9.7':0.5,
-        '3.9.8':0.25,'3.10':0.75
-      };
+        '3.9.8':0.25,'3.10':0.75};
       document.querySelectorAll('.peca-card').forEach(pc=>{
-        const cod = (pc.querySelector('.pc-sel')?.value||'').split('|')[0].trim();
-        const qtd = parseFloat(pc.querySelector('.pc-qtd')?.value||1)||1;
-        if(FRAC_ITEM[cod]) frac += FRAC_ITEM[cod] * qtd;
+        const cod=(pc.querySelector('.pc-sel')?.value||'').split('|')[0].trim();
+        const qtd=parseFloat(pc.querySelector('.pc-qtd')?.value||1)||1;
+        if(FRAC[cod]) frac+=FRAC[cod]*qtd;
       });
-      return Math.round(frac * 1000) / 1000; // arredondar 3 casas
+      return Math.round(frac*1000)/1000;
     };
     const diasCalculado = calcDiarias();
-    document.getElementById('sv-dias').value = diasCalculado;
-      diarias:String(document.getElementById('sv-dias').value||'0'),km:'0',garantia:v('sv-gar')||'90',
+    // retorno já definido acima com calcDiarias
+    const _dummy_="x";
+      dtconc:v('sv-ini')?.slice(0,10)||new Date().toISOString().slice(0,10),
+      hora:v('sv-fim')?.slice(11,16)||v('sv-ini')?.slice(11,16)||'',
+      servicos:v('sv-det'),solucao:v('sv-sol'),
+      pendencias:v('sv-pend'),pend_desc:v('sv-pend-desc'),
+      diarias:String(diasCalculado),km:'0',garantia:v('sv-gar')||'90',
       medicoes:{rede:v('me-rede'),nb:v('me-nb'),v24:v('me-24'),v5:v('me-5'),emm:v('me-emm')},
       itens_nc:ncs,itens_conf:confs,total_fotos:totalFotos,
       pecas,adm_nome:v('adm-n'),adm_doc:v('adm-d'),obs:v('adm-obs'),
