@@ -302,7 +302,7 @@ html,body{min-height:100%;background:#1a1a1a;font-family:-apple-system,BlinkMacS
             <div id="sv-pend-f" style="display:none" class="fld"><label>Descrição das pendências</label><textarea id="sv-pend-desc"></textarea></div>
           </div>
         </div>
-        <button class="btn bp" onclick="var _t=detectarTipo(OS_ATUAL&&OS_ATUAL.servico||'');if(_t.includes('CFTV')){var _ii=document.querySelectorAll('.ip-inp');var _found=false;for(var _x=0;_x<_ii.length;_x++)if(_ii[_x].value.trim()){_found=true;break;}if(!_found){var _bl=document.getElementById('ip-bloco');if(_bl){_bl.style.border='2px solid var(--rd)';_bl.scrollIntoView({behavior:'smooth'});}toast('Informe ao menos 1 IP para CFTV','error');return;}}ir('s3');">Próximo — Período e responsável →</button>
+        <button class="btn bp" onclick="var _t=detectarTipo(OS_ATUAL&&OS_ATUAL.servico||'');if(_t.includes('CFTV')){var _ii=document.querySelectorAll('.ip-inp');var _found=false;for(var _xi=0;_xi<_ii.length;_xi++)if(_ii[_xi].value.trim()){_found=true;break;}if(!_found){var _bl=document.getElementById('ip-bloco');if(_bl){_bl.style.border='2px solid var(--rd)';_bl.scrollIntoView({behavior:'smooth'});}toast('Informe ao menos 1 IP para CFTV','error');return;}}ir('s3');">Próximo — Período e responsável →</button>
       </div>
     </div>
 
@@ -329,7 +329,7 @@ html,body{min-height:100%;background:#1a1a1a;font-family:-apple-system,BlinkMacS
                 <input type="datetime-local" id="sv-fim" placeholder="Preenchido automaticamente">
               </div>
             </div>
-            <p style="font-size:12px;color:var(--mu);margin:8px 0">Diárias calculadas automaticamente. KM informado pela fiscalização.</p><input type="hidden" id="sv-dias" value="0"><input type="hidden" id="sv-km" value="0">
+            <p style="font-size:12px;color:var(--mu);margin:8px 0">Diarias calculadas automaticamente. KM informado pela fiscalizacao.</p><input type="hidden" id="sv-dias" value="0"><input type="hidden" id="sv-km" value="0">
           </div>
         </div>
         <div class="card">
@@ -1193,20 +1193,7 @@ async function finalizarOS(){
     });
     const totalFotos=Object.values(fotosCount).reduce((a,b)=>a+b,0);
     const relatorioHTML=gerarRelatorioHTML(o,emailTec,ncs,confs,nas,pecas,fotosCount);
-    var FRAC_D={'3.1.1':0.125,'3.1.2':0.25,'3.1.3':0.375,'3.1.4':0.25,'3.1.5':0.125,'3.1.6':0.125,'3.1.7':0.125,'3.1.8':0.25,'3.1.9':0.25,'3.1.10':0.125,'3.1.11':0.125,'3.1.12':0.125,'3.1.13':0.375,'3.2.1':0.125,'3.2.2':0.125,'3.2.3':0.125,'3.2.4':0.125,'3.2.5':0.125,'3.2.6':0.125,'3.3.1':0.125,'3.3.2':0.125,'3.4':0.188,'3.5.1':0.125,'3.5.2':0.125,'3.5.3':0.125,'3.5.4':0.125,'3.5.5':0.125,'3.5.6':0.125,'3.5.7':0.125,'3.5.8':0.125,'3.6.1':1.0,'3.6.2':1.0,'3.6.3':1.0,'3.6.4':0.00417,'3.7.1':0.125,'3.7.2':0.125,'3.7.3':0.125,'3.7.4':0.125,'3.8.1':0.125,'3.8.2':0.125,'3.8.3':0.125,'3.8.4':0.125,'3.8.5':0.125,'3.8.6':0.125,'3.8.7':0.125,'3.9.1':0.125,'3.9.2':0.125,'3.9.3':0.125,'3.9.4':0.125,'3.9.5':0.25,'3.9.6':0.25,'3.9.7':0.5,'3.9.8':0.25,'3.10':0.75};
-    var _sTp=(OS_ATUAL&&(OS_ATUAL.servico||OS_ATUAL.tipo)||'').toLowerCase();
-    var _fr=(_sTp.indexOf('raio')>=0||_sTp.indexOf('scanner')>=0)?1.25:1.0;
-    var _pcs=document.querySelectorAll('.peca-card');
-    for(var _pi=0;_pi<_pcs.length;_pi++){
-      var _cd=(_pcs[_pi].querySelector('.pc-sel')&&_pcs[_pi].querySelector('.pc-sel').value||'').split('|')[0].trim();
-      var _qt=parseFloat(_pcs[_pi].querySelector('.pc-qtd')&&_pcs[_pi].querySelector('.pc-qtd').value||1)||1;
-      if(FRAC_D[_cd])_fr+=FRAC_D[_cd]*_qt;
-    }
-    document.getElementById('sv-dias').value=Math.round(_fr*1000)/1000;
-    var ipsData=typeof getIPsData==='function'?getIPsData():null;
-    const retorno={
-      tecnico:emailTec,
-      ips_cftv:ipsData,
+    var FRAC_D={'3.1.1':0.125,'3.1.2':0.25,'3.1.3':0.375,'3.1.4':0.25,'3.1.5':0.125,'3.1.6':0.125,'3.1.7':0.125,'3.1.8':0.25,'3.1.9':0.25,'3.1.10':0.125,'3.1.11':0.125,'3.1.12':0.125,'3.1.13':0.375,'3.2.1':0.125,'3.2.2':0.125,'3.2.3':0.125,'3.2.4':0.125,'3.2.5':0.125,'3.2.6':0.125,'3.3.1':0.125,'3.3.2':0.125,'3.4':0.188,'3.5.1':0.125,'3.5.2':0.125,'3.5.3':0.125,'3.5.4':0.125,'3.5.5':0.125,'3.5.6':0.125,'3.5.7':0.125,'3.5.8':0.125,'3.6.1':1.0,'3.6.2':1.0,'3.6.3':1.0,'3.6.4':0.00417,'3.7.1':0.125,'3.7.2':0.125,'3.7.3':0.125,'3.7.4':0.125,'3.8.1':0.125,'3.8.2':0.125,'3.8.3':0.125,'3.8.4':0.125,'3.8.5':0.125,'3.8.6':0.125,'3.8.7':0.125,'3.9.1':0.125,'3.9.2':0.125,'3.9.3':0.125,'3.9.4':0.125,'3.9.5':0.25,'3.9.6':0.25,'3.9.7':0.5,'3.9.8':0.25,'3.10':0.75};var _sTp=(OS_ATUAL&&(OS_ATUAL.servico||OS_ATUAL.tipo)||'').toLowerCase();var _fr=(_sTp.indexOf('raio')>=0||_sTp.indexOf('scanner')>=0)?1.25:1.0;var _pcs=document.querySelectorAll('.peca-card');for(var _pi=0;_pi<_pcs.length;_pi++){var _cd=(_pcs[_pi].querySelector('.pc-sel')&&_pcs[_pi].querySelector('.pc-sel').value||'').split('|')[0].trim();var _qt=parseFloat(_pcs[_pi].querySelector('.pc-qtd')&&_pcs[_pi].querySelector('.pc-qtd').value||1)||1;if(FRAC_D[_cd])_fr+=FRAC_D[_cd]*_qt;}document.getElementById('sv-dias').value=Math.round(_fr*1000)/1000;var ipsData=typeof getIPsData==='function'?getIPsData():null;const retorno={tecnico:emailTec,ips_cftv:ipsData,
       dtconc:v('sv-ini')?.slice(0,10)||new Date().toISOString().slice(0,10),
       hora:v('sv-fim')?.slice(11,16)||v('sv-ini')?.slice(11,16)||'',
       servicos:v('sv-det'),solucao:v('sv-sol'),
@@ -1501,88 +1488,44 @@ document.addEventListener('input',e=>{
   if(_ls.access_token&&_ls.access_token.startsWith('local-')){SESSION=_ls;iniciarApp(_ls.nome||'Técnico');}else{q('login').style.display='flex';}
   },1500);
 
-// === Funções de IPs CFTV ===
 function renderIPsCFTV(cont){
-  var card=document.createElement('div');
-  card.className='card';
-  card.style.cssText='margin-bottom:10px;border:2px solid var(--pr)';
-  
+  var card=document.createElement('div');card.className='card';card.style.cssText='margin-bottom:10px;border:2px solid var(--pr)';
   var hdr=document.createElement('div');hdr.className='ch';
   var t1=document.createElement('span');t1.className='ct';t1.style.color='var(--pr)';t1.textContent='IPs registrados na comarca';
   var t2=document.createElement('span');t2.className='badge';t2.style.cssText='background:var(--pr);color:white';t2.textContent='CFTV - obrigatorio';
   hdr.appendChild(t1);hdr.appendChild(t2);
-
   var body=document.createElement('div');body.className='cb';body.id='ip-bloco';
-
-  var info=document.createElement('p');info.style.cssText='font-size:12px;color:var(--mu);margin-bottom:10px';
-  info.textContent='Informe todos os IPs configurados (DVR, cameras, etc.)';
+  var info=document.createElement('p');info.style.cssText='font-size:12px;color:var(--mu);margin-bottom:10px';info.textContent='Informe todos os IPs (DVR, cameras, etc.)';
   body.appendChild(info);
-
-  var lista=document.createElement('div');lista.id='ip-lista';
-  lista.appendChild(criarLinhaIP());
-  body.appendChild(lista);
-
-  var btnAdd=document.createElement('button');
-  btnAdd.textContent='+ Adicionar IP';
-  btnAdd.style.cssText='width:100%;background:var(--sf);border:1.5px dashed var(--pr);color:var(--pr);border-radius:6px;padding:8px;cursor:pointer;font-size:13px;font-weight:600;margin-top:4px';
-  btnAdd.onclick=function(){document.getElementById('ip-lista').appendChild(criarLinhaIP());};
-  body.appendChild(btnAdd);
-
-  var secAlt=document.createElement('div');
-  secAlt.style.cssText='margin-top:14px;border-top:1px solid var(--bd);padding-top:12px';
-
-  var lbAlt=document.createElement('p');lbAlt.style.cssText='font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px';
-  lbAlt.textContent='IP foi alterado?';
-  secAlt.appendChild(lbAlt);
-
+  var lista=document.createElement('div');lista.id='ip-lista';lista.appendChild(criarLinhaIP());body.appendChild(lista);
+  var btnAdd=document.createElement('button');btnAdd.textContent='+ Adicionar IP';btnAdd.style.cssText='width:100%;background:var(--sf);border:1.5px dashed var(--pr);color:var(--pr);border-radius:6px;padding:8px;cursor:pointer;font-size:13px;font-weight:600;margin-top:4px';btnAdd.onclick=function(){document.getElementById('ip-lista').appendChild(criarLinhaIP());};body.appendChild(btnAdd);
+  var secAlt=document.createElement('div');secAlt.style.cssText='margin-top:14px;border-top:1px solid var(--bd);padding-top:12px';
+  var lbAlt=document.createElement('p');lbAlt.style.cssText='font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px';lbAlt.textContent='IP foi alterado?';secAlt.appendChild(lbAlt);
   var btnRow=document.createElement('div');btnRow.style.cssText='display:flex;gap:8px;margin-bottom:8px';
-  var bNao=document.createElement('button');bNao.id='ip-alt-nao';
-  bNao.style.cssText='flex:1;padding:10px;border-radius:6px;border:2px solid var(--gn);background:#f0fdf4;font-weight:600;cursor:pointer';
-  bNao.textContent='Nao alterado';
-  bNao.onclick=function(){setIPAlterado(false);};
-  var bSim=document.createElement('button');bSim.id='ip-alt-sim';
-  bSim.style.cssText='flex:1;padding:10px;border-radius:6px;border:2px solid var(--bd);background:var(--sf);font-weight:600;cursor:pointer';
-  bSim.textContent='Sim, alterado';
-  bSim.onclick=function(){setIPAlterado(true);};
-  btnRow.appendChild(bNao);btnRow.appendChild(bSim);
-  secAlt.appendChild(btnRow);
-
+  var bNao=document.createElement('button');bNao.id='ip-alt-nao';bNao.style.cssText='flex:1;padding:10px;border-radius:6px;border:2px solid var(--gn);background:#f0fdf4;font-weight:600;cursor:pointer';bNao.textContent='Nao alterado';bNao.onclick=function(){setIPAlterado(false);};
+  var bSim=document.createElement('button');bSim.id='ip-alt-sim';bSim.style.cssText='flex:1;padding:10px;border-radius:6px;border:2px solid var(--bd);background:var(--sf);font-weight:600;cursor:pointer';bSim.textContent='Sim, alterado';bSim.onclick=function(){setIPAlterado(true);};
+  btnRow.appendChild(bNao);btnRow.appendChild(bSim);secAlt.appendChild(btnRow);
   var blocoAlt=document.createElement('div');blocoAlt.id='ip-alt-bloco';blocoAlt.style.display='none';
-  var listaAlt=document.createElement('div');listaAlt.id='ip-alt-lista';
-  listaAlt.appendChild(criarLinhaIPAlt());
-  blocoAlt.appendChild(listaAlt);
-  var btnAddAlt=document.createElement('button');
-  btnAddAlt.textContent='+ Mais alteracao';
-  btnAddAlt.style.cssText='width:100%;background:var(--sf);border:1.5px dashed var(--am);color:var(--am);border-radius:6px;padding:7px;cursor:pointer;font-size:12px;font-weight:600;margin-top:4px';
-  btnAddAlt.onclick=function(){document.getElementById('ip-alt-lista').appendChild(criarLinhaIPAlt());};
-  blocoAlt.appendChild(btnAddAlt);
-  secAlt.appendChild(blocoAlt);
-  body.appendChild(secAlt);
-
-  var resumo=document.createElement('div');resumo.id='ip-resumo';
-  resumo.style.cssText='display:none;margin-top:10px;background:var(--sf);border-radius:6px;padding:10px;font-size:12px;font-family:monospace;white-space:pre-line;line-height:1.7';
-  body.appendChild(resumo);
-
-  card.appendChild(hdr);card.appendChild(body);
-  cont.appendChild(card);
-  window._ipAlterado=false;
+  var listaAlt=document.createElement('div');listaAlt.id='ip-alt-lista';listaAlt.appendChild(criarLinhaIPAlt());blocoAlt.appendChild(listaAlt);
+  var btnAddAlt=document.createElement('button');btnAddAlt.textContent='+ Mais alteracao';btnAddAlt.style.cssText='width:100%;background:var(--sf);border:1.5px dashed var(--am);color:var(--am);border-radius:6px;padding:7px;cursor:pointer;font-size:12px;font-weight:600;margin-top:4px';btnAddAlt.onclick=function(){document.getElementById('ip-alt-lista').appendChild(criarLinhaIPAlt());};blocoAlt.appendChild(btnAddAlt);
+  secAlt.appendChild(blocoAlt);body.appendChild(secAlt);
+  var res=document.createElement('div');res.id='ip-resumo';res.style.cssText='display:none;margin-top:10px;background:var(--sf);border-radius:6px;padding:10px;font-size:12px;font-family:monospace;white-space:pre-line;line-height:1.7';body.appendChild(res);
+  card.appendChild(hdr);card.appendChild(body);cont.appendChild(card);window._ipAlterado=false;
 }
 function criarLinhaIP(){
-  var row=document.createElement('div');row.className='ip-row';row.style.cssText='display:flex;gap:8px;margin-bottom:8px';
-  var i1=document.createElement('input');i1.className='ip-inp';i1.type='text';i1.placeholder='192.168.1.100';i1.style.cssText='flex:1;font-family:monospace';i1.oninput=atualizarResumoIPs;
-  var i2=document.createElement('input');i2.className='ip-desc';i2.type='text';i2.placeholder='DVR, camera...';i2.style.flex='1';i2.oninput=atualizarResumoIPs;
-  var bt=document.createElement('button');bt.textContent='X';bt.style.cssText='background:none;border:none;color:var(--rd);cursor:pointer;font-size:18px;padding:0 4px';
-  bt.onclick=function(){this.parentElement.remove();atualizarResumoIPs();};
+  var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;margin-bottom:8px';
+  var i1=document.createElement('input');i1.className='ip-inp';i1.type='text';i1.placeholder='192.168.1.100';i1.style.cssText='flex:1;font-family:monospace';i1.addEventListener('input',atualizarResumoIPs);
+  var i2=document.createElement('input');i2.className='ip-desc';i2.type='text';i2.placeholder='DVR, camera...';i2.style.flex='1';i2.addEventListener('input',atualizarResumoIPs);
+  var bt=document.createElement('button');bt.textContent='X';bt.style.cssText='background:none;border:none;color:var(--rd);cursor:pointer;font-size:18px;padding:0 4px';bt.onclick=function(){this.parentElement.remove();atualizarResumoIPs();};
   row.appendChild(i1);row.appendChild(i2);row.appendChild(bt);return row;
 }
 function criarLinhaIPAlt(){
   var row=document.createElement('div');row.className='ip-alt-row';row.style.cssText='display:flex;gap:6px;margin-bottom:6px;align-items:center';
-  var a=document.createElement('input');a.className='ip-ant';a.type='text';a.placeholder='IP anterior';a.style.cssText='flex:1;font-family:monospace';a.oninput=atualizarResumoIPs;
+  var a=document.createElement('input');a.className='ip-ant';a.type='text';a.placeholder='IP anterior';a.style.cssText='flex:1;font-family:monospace';a.addEventListener('input',atualizarResumoIPs);
   var sp=document.createElement('span');sp.textContent='->';sp.style.color='var(--mu)';
-  var n=document.createElement('input');n.className='ip-novo-alt';n.type='text';n.placeholder='IP novo';n.style.cssText='flex:1;font-family:monospace';n.oninput=atualizarResumoIPs;
-  var d=document.createElement('input');d.className='ip-alt-desc';d.type='text';d.placeholder='Equipamento';d.style.flex='1';d.oninput=atualizarResumoIPs;
-  var bt=document.createElement('button');bt.textContent='X';bt.style.cssText='background:none;border:none;color:var(--rd);cursor:pointer;font-size:18px;padding:0 4px';
-  bt.onclick=function(){this.parentElement.remove();atualizarResumoIPs();};
+  var n=document.createElement('input');n.className='ip-novo-alt';n.type='text';n.placeholder='IP novo';n.style.cssText='flex:1;font-family:monospace';n.addEventListener('input',atualizarResumoIPs);
+  var d=document.createElement('input');d.className='ip-alt-desc';d.type='text';d.placeholder='Equipamento';d.style.flex='1';d.addEventListener('input',atualizarResumoIPs);
+  var bt=document.createElement('button');bt.textContent='X';bt.style.cssText='background:none;border:none;color:var(--rd);cursor:pointer;font-size:18px;padding:0 4px';bt.onclick=function(){this.parentElement.remove();atualizarResumoIPs();};
   row.appendChild(a);row.appendChild(sp);row.appendChild(n);row.appendChild(d);row.appendChild(bt);return row;
 }
 function setIPAlterado(sim){
@@ -1596,23 +1539,14 @@ function setIPAlterado(sim){
 function atualizarResumoIPs(){
   var resumo=document.getElementById('ip-resumo');if(!resumo)return;
   var inps=document.querySelectorAll('.ip-inp');var descs=document.querySelectorAll('.ip-desc');
-  var txt='';var linhas=[];
+  var linhas=[];
   for(var i=0;i<inps.length;i++){if(inps[i].value.trim()){linhas.push('* '+inps[i].value.trim()+(descs[i]&&descs[i].value?' ('+descs[i].value+')':''));}}
-  if(linhas.length)txt='IPs registrados:
-'+linhas.join('
-');
-  if(window._ipAlterado){
-    var rows=document.querySelectorAll('.ip-alt-row');var alts=[];
-    for(var j=0;j<rows.length;j++){
-      var ant=rows[j].querySelector('.ip-ant');var nov=rows[j].querySelector('.ip-novo-alt');var dsc=rows[j].querySelector('.ip-alt-desc');
-      if((ant&&ant.value)||(nov&&nov.value)){alts.push('  '+(ant?ant.value:'?')+' -> '+(nov?nov.value:'?')+(dsc&&dsc.value?' ('+dsc.value+')':''));}
-    }
-    if(alts.length)txt+=(txt?'
-
-':'')+'IPs alterados:
-'+alts.join('
-');
-  }
+  var altLinhas=[];
+  if(window._ipAlterado){var rows=document.querySelectorAll('.ip-alt-row');for(var j=0;j<rows.length;j++){var ant=rows[j].querySelector('.ip-ant');var nov=rows[j].querySelector('.ip-novo-alt');var dsc=rows[j].querySelector('.ip-alt-desc');if((ant&&ant.value)||(nov&&nov.value)){altLinhas.push('  '+(ant?ant.value:'?')+' -> '+(nov?nov.value:'?')+(dsc&&dsc.value?' ('+dsc.value+')':''));}}}
+  var partes=[];
+  if(linhas.length)partes.push('IPs registrados:\n'+linhas.join('\n'));
+  if(altLinhas.length)partes.push('IPs alterados:\n'+altLinhas.join('\n'));
+  var txt=partes.join('\n\n');
   resumo.style.display=txt?'block':'none';resumo.textContent=txt;window._ipsResumo=txt;
 }
 function getIPsData(){
