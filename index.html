@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GEASI Téc.">
 <meta name="theme-color" content="#0f2744">
-<title>GEASI — Técnico</title><!-- build:1784055759 -->
+<title>GEASI — Técnico</title><!-- build:1784056614 -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -333,11 +333,9 @@ html,body{min-height:100%;background:#0f1f12;font-family:-apple-system,BlinkMacS
         <div class="card" style="margin-top:8px">
           <div class="ch"><span class="ct">⏱ Período de atendimento</span></div>
           <div class="cb">
-            <div class="fr">
-              <div class="fld"><label>Início</label><input type="datetime-local" id="sv-ini"></div>
-              <div class="fld"><label>Término <small style="color:var(--gn);font-weight:700">preenchido ao enviar</small></label>
-                <input type="datetime-local" id="sv-fim" placeholder="Preenchido automaticamente">
-              </div>
+            <div class="fld"><label>Início</label><input type="datetime-local" id="sv-ini"></div>
+            <div class="fld"><label>Término <small style="color:var(--gn);font-weight:700">preenchido ao enviar</small></label>
+              <input type="datetime-local" id="sv-fim" placeholder="Preenchido automaticamente" disabled>
             </div>
             <p style="font-size:12px;color:var(--mu);margin:8px 0">Diarias calculadas automaticamente. KM informado pela fiscalizacao.</p><input type="hidden" id="sv-dias" value="0"><input type="hidden" id="sv-km" value="0">
           </div>
@@ -457,6 +455,16 @@ window.addEventListener('offline',atualizarIndOnline);
 /* ── HELPERS ── */
 function h(tag,cls='',html=''){const e=document.createElement(tag);if(cls)e.className=cls;if(html)e.innerHTML=html;return e;}
 function v(id){return document.getElementById(id)?.value||'';}
+function localISODateTime(d){
+  d = d || new Date();
+  const p = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function localISODate(d){
+  d = d || new Date();
+  const p = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+}
 function q(id){return document.getElementById(id);}
 function toast(msg,dur=2800){const t=q('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),dur);}
 function spinner(){return '<span class="spinner"></span>';}
@@ -661,9 +669,9 @@ function abrirOS(num){
   ['sv-det','sv-sol','sv-pend-desc','adm-n','adm-d','adm-obs','me-rede','me-nb','me-24','me-5','me-emm'].forEach(id=>{const el=q(id);if(el)el.value='';});
   if(q('sv-pend')) q('sv-pend').value='nao'; if(q('sv-pend-f')) q('sv-pend-f').style.display='none';
   if(q('sv-gar')) q('sv-gar').value='90'; if(q('sv-dias')) q('sv-dias').value='0'; if(q('sv-km')) q('sv-km').value='0';
-  if(q('sv-ini')) q('sv-ini').value=new Date().toISOString().slice(0,16);
+  if(q('sv-ini')) q('sv-ini').value=localISODateTime();
   if(q('sv-fim')) q('sv-fim').value='';
-  if(q('adm-dt')) q('adm-dt').value=new Date().toISOString().slice(0,10);
+  if(q('adm-dt')) q('adm-dt').value=localISODate();
   const o=OS_ATUAL;
   // Passo 1
   if(q('s1-tipo')) q('s1-tipo').textContent=o.tipo||'—';
@@ -1124,7 +1132,7 @@ function validar(){
 /* ── PRÉVIA ── */
 function irPrevia(){
   // Registrar data/hora de término automaticamente
-  const agora=new Date().toISOString().slice(0,16);
+  const agora=localISODateTime();
   // Preencher término automaticamente ao avançar para prévia
   const fim=document.getElementById('sv-fim');
   if(fim&&!fim.value)fim.value=agora;
@@ -1232,7 +1240,7 @@ async function finalizarOS(){
   // Preencher término com hora atual se não preenchido
   const svFim = document.getElementById('sv-fim');
   if(svFim && !svFim.value) {
-    svFim.value = new Date().toISOString().slice(0,16);
+    svFim.value = localISODateTime();
   }
   q('s4-err').style.display='none';
   const btn=q('btn-enviar');
@@ -1260,7 +1268,7 @@ async function finalizarOS(){
     const relatorioHTML=gerarRelatorioHTML(o,emailTec,ncs,confs,nas,pecas,fotosCount);
     var FRAC_D={'3.1.1':0.125,'3.1.2':0.25,'3.1.3':0.375,'3.1.4':0.25,'3.1.5':0.125,'3.1.6':0.125,'3.1.7':0.125,'3.1.8':0.25,'3.1.9':0.25,'3.1.10':0.125,'3.1.11':0.125,'3.1.12':0.125,'3.1.13':0.375,'3.2.1':0.125,'3.2.2':0.125,'3.2.3':0.125,'3.2.4':0.125,'3.2.5':0.125,'3.2.6':0.125,'3.3.1':0.125,'3.3.2':0.125,'3.4':0.188,'3.5.1':0.125,'3.5.2':0.125,'3.5.3':0.125,'3.5.4':0.125,'3.5.5':0.125,'3.5.6':0.125,'3.5.7':0.125,'3.5.8':0.125,'3.6.1':1.0,'3.6.2':1.0,'3.6.3':1.0,'3.6.4':0.00417,'3.7.1':0.125,'3.7.2':0.125,'3.7.3':0.125,'3.7.4':0.125,'3.8.1':0.125,'3.8.2':0.125,'3.8.3':0.125,'3.8.4':0.125,'3.8.5':0.125,'3.8.6':0.125,'3.8.7':0.125,'3.9.1':0.125,'3.9.2':0.125,'3.9.3':0.125,'3.9.4':0.125,'3.9.5':0.25,'3.9.6':0.25,'3.9.7':0.5,'3.9.8':0.25,'3.10':0.75};var _sTp=(OS_ATUAL&&(OS_ATUAL.servico||OS_ATUAL.tipo)||'').toLowerCase();var _fr=(_sTp.indexOf('raio')>=0||_sTp.indexOf('scanner')>=0)?1.25:1.0;var _pcs=document.querySelectorAll('.peca-card');for(var _pi=0;_pi<_pcs.length;_pi++){var _cd=(_pcs[_pi].querySelector('.pc-sel')&&_pcs[_pi].querySelector('.pc-sel').value||'').split('|')[0].trim();var _qt=parseFloat(_pcs[_pi].querySelector('.pc-qtd')&&_pcs[_pi].querySelector('.pc-qtd').value||1)||1;if(FRAC_D[_cd])_fr+=FRAC_D[_cd]*_qt;}document.getElementById('sv-dias').value=Math.round(_fr*1000)/1000;var ipsData=typeof getIPsData==='function'?getIPsData():null;
     var sigData=typeof sigGetBase64==='function'?sigGetBase64():null;const retorno={tecnico:emailTec,ips_cftv:ipsData,assinatura_responsavel:sigData,
-      dtconc:v('sv-ini')?.slice(0,10)||new Date().toISOString().slice(0,10),
+      dtconc:v('sv-ini')?.slice(0,10)||localISODate(),
       hora:v('sv-fim')?.slice(11,16)||v('sv-ini')?.slice(11,16)||'',
       servicos:v('sv-det'),solucao:v('sv-sol'),
       pendencias:v('sv-pend'),pend_desc:v('sv-pend-desc'),
