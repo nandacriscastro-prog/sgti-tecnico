@@ -303,13 +303,13 @@ html,body{min-height:100%;background:#1a1a1a;font-family:-apple-system,BlinkMacS
           </div>
         </div>
         <button class="btn bp" onclick="
-  const tipos=detectarTipo(OS_ATUAL?.servico||'');
-  if(tipos.includes('CFTV')){
-    const ips=[...document.querySelectorAll('.ip-inp')].filter(el=>el.value.trim());
-    if(!ips.length){
+  const _tipos=detectarTipo(OS_ATUAL?.servico||'');
+  if(_tipos.includes('CFTV')){
+    const _ips=[...document.querySelectorAll('.ip-inp')].filter(el=>el.value.trim());
+    if(!_ips.length){
       const bl=document.getElementById('ip-bloco');
       if(bl){bl.style.border='2px solid var(--rd)';bl.scrollIntoView({behavior:'smooth',block:'center'});}
-      toast('⚠️ Informe pelo menos 1 IP registrado na comarca','error');return;
+      toast('⚠️ Informe pelo menos 1 IP registrado (obrigatório para CFTV)','error');return;
     }
   }
   ir('s3');
@@ -502,10 +502,8 @@ function doLogout(){
 }
 function iniciarApp(nomeOuEmail){
   q('login').style.display='none';q('app').style.display='flex';
-  const _noe = nomeOuEmail || SESSION?.nome || SESSION?.email || 'Técnico';
-  const nome = typeof _noe === 'string' && _noe.includes('@')
-    ? _noe.split('@')[0].replace(/\./g,' ')
-    : _noe;
+  const _noe=nomeOuEmail||SESSION?.nome||SESSION?.email||'Técnico';
+  const nome=typeof _noe==='string'&&_noe.includes('@')?_noe.split('@')[0].replace(/\./g,' '):_noe;
   q('hm-nome').textContent=nome;
   q('hdr-av').textContent=nome[0].toUpperCase();
   q('hm-data').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
@@ -784,6 +782,121 @@ function renderChecklist(serv){
     card.appendChild(body);
     cont.appendChild(card);
   });
+
+  // Bloco IPs para CFTV
+  if(tipos.includes('CFTV')){
+    const ipCard=h('div','card','');
+    ipCard.style.cssText='margin-bottom:10px;border:2px solid var(--pr)';
+    ipCard.innerHTML=`
+      <div class="ch"><span class="ct" style="color:var(--pr)">🌐 IPs registrados na comarca</span>
+        <span class="badge" style="background:var(--pr);color:white">CFTV — obrigatório</span></div>
+      <div class="cb" id="ip-bloco">
+        <p style="font-size:12px;color:var(--mu);margin-bottom:10px">Informe todos os IPs configurados (DVR, câmeras, etc.)</p>
+        <div id="ip-lista">
+          <div class="ip-row" style="display:flex;gap:8px;margin-bottom:8px">
+            <input class="ip-inp" type="text" placeholder="Ex: 192.168.1.100" style="flex:1;font-family:monospace" oninput="atualizarResumoIPs()">
+            <input class="ip-desc" type="text" placeholder="DVR, câmera 1..." style="flex:1" oninput="atualizarResumoIPs()">
+          </div>
+        </div>
+        <button onclick="adicionarLinhaIP()" style="width:100%;background:var(--sf);border:1.5px dashed var(--pr);color:var(--pr);border-radius:6px;padding:8px;cursor:pointer;font-size:13px;font-weight:600;margin-top:4px">+ Adicionar IP</button>
+        <div style="margin-top:14px;border-top:1px solid var(--bd);padding-top:12px">
+          <p style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px">IP foi alterado?</p>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <button id="ip-alt-nao" onclick="setIPAlterado(false)" style="flex:1;padding:10px;border-radius:6px;border:2px solid var(--gn);background:#f0fdf4;font-weight:600;cursor:pointer">✓ Não alterado</button>
+            <button id="ip-alt-sim" onclick="setIPAlterado(true)" style="flex:1;padding:10px;border-radius:6px;border:2px solid var(--bd);background:var(--sf);font-weight:600;cursor:pointer">⚠️ Sim, alterado</button>
+          </div>
+          <div id="ip-alt-bloco" style="display:none">
+            <p style="font-size:12px;color:var(--mu);margin-bottom:6px">IP anterior → IP novo:</p>
+            <div id="ip-alt-lista">
+              <div class="ip-alt-row" style="display:flex;gap:6px;margin-bottom:6px;align-items:center">
+                <input class="ip-ant" type="text" placeholder="IP anterior" style="flex:1;font-family:monospace" oninput="atualizarResumoIPs()">
+                <span style="color:var(--mu)">→</span>
+                <input class="ip-novo-alt" type="text" placeholder="IP novo" style="flex:1;font-family:monospace" oninput="atualizarResumoIPs()">
+                <input class="ip-alt-desc" type="text" placeholder="Equipamento" style="flex:1" oninput="atualizarResumoIPs()">
+              </div>
+            </div>
+            <button onclick="adicionarLinhaIPAlt()" style="width:100%;background:var(--sf);border:1.5px dashed var(--am);color:var(--am);border-radius:6px;padding:7px;cursor:pointer;font-size:12px;font-weight:600;margin-top:4px">+ Mais alteração</button>
+          </div>
+        </div>
+        <div id="ip-resumo" style="display:none;margin-top:10px;background:var(--sf);border-radius:6px;padding:10px;font-size:12px;font-family:monospace;white-space:pre-line;line-height:1.7"></div>
+      </div>`;
+    cont.appendChild(ipCard);
+    window._ipAlterado=false;
+  }
+}
+
+function adicionarLinhaIP(){
+  const lista=document.getElementById('ip-lista');if(!lista)return;
+  const row=document.createElement('div');row.className='ip-row';
+  row.style.cssText='display:flex;gap:8px;margin-bottom:8px';
+  row.innerHTML=`<input class="ip-inp" type="text" placeholder="Ex: 192.168.1.100" style="flex:1;font-family:monospace" oninput="atualizarResumoIPs()">
+    <input class="ip-desc" type="text" placeholder="DVR, câmera 1..." style="flex:1" oninput="atualizarResumoIPs()">
+    <button onclick="this.parentElement.remove();atualizarResumoIPs()" style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:18px">✕</button>`;
+  lista.appendChild(row);
+}
+
+function adicionarLinhaIPAlt(){
+  const lista=document.getElementById('ip-alt-lista');if(!lista)return;
+  const row=document.createElement('div');row.className='ip-alt-row';
+  row.style.cssText='display:flex;gap:6px;margin-bottom:6px;align-items:center';
+  row.innerHTML=`<input class="ip-ant" type="text" placeholder="IP anterior" style="flex:1;font-family:monospace" oninput="atualizarResumoIPs()">
+    <span style="color:var(--mu)">→</span>
+    <input class="ip-novo-alt" type="text" placeholder="IP novo" style="flex:1;font-family:monospace" oninput="atualizarResumoIPs()">
+    <input class="ip-alt-desc" type="text" placeholder="Equipamento" style="flex:1" oninput="atualizarResumoIPs()">
+    <button onclick="this.parentElement.remove();atualizarResumoIPs()" style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:18px">✕</button>`;
+  lista.appendChild(row);
+}
+
+function setIPAlterado(sim){
+  window._ipAlterado=sim;
+  const bloco=document.getElementById('ip-alt-bloco');
+  if(bloco)bloco.style.display=sim?'block':'none';
+  const btnSim=document.getElementById('ip-alt-sim');
+  const btnNao=document.getElementById('ip-alt-nao');
+  if(btnSim){btnSim.style.border=sim?'2px solid var(--am)':'2px solid var(--bd)';btnSim.style.background=sim?'#fffbeb':'var(--sf)';}
+  if(btnNao){btnNao.style.border=!sim?'2px solid var(--gn)':'2px solid var(--bd)';btnNao.style.background=!sim?'#f0fdf4':'var(--sf)';}
+  atualizarResumoIPs();
+}
+
+function atualizarResumoIPs(){
+  const resumo=document.getElementById('ip-resumo');if(!resumo)return;
+  const ips=[...document.querySelectorAll('.ip-inp')].map((el,i)=>{
+    const desc=document.querySelectorAll('.ip-desc')[i]?.value||'';
+    return el.value.trim()?`• ${el.value.trim()}${desc?' ('+desc+')':''}`:null;
+  }).filter(Boolean);
+  let txt=ips.length?'IPs registrados:
+'+ips.join('
+'):'';
+  if(window._ipAlterado){
+    const alts=[...document.querySelectorAll('.ip-alt-row')].map(row=>{
+      const ant=row.querySelector('.ip-ant')?.value||'';
+      const nov=row.querySelector('.ip-novo-alt')?.value||'';
+      const desc=row.querySelector('.ip-alt-desc')?.value||'';
+      return ant||nov?`  ${ant||'?'} → ${nov||'?'}${desc?' ('+desc+')':''}`:null;
+    }).filter(Boolean);
+    if(alts.length)txt+=(txt?'
+
+':'')+'IPs alterados:
+'+alts.join('
+');
+  }
+  resumo.style.display=txt?'block':'none';
+  resumo.textContent=txt;
+  window._ipsResumo=txt;
+}
+
+function getIPsData(){
+  const ips=[...document.querySelectorAll('.ip-inp')].map((el,i)=>{
+    const desc=document.querySelectorAll('.ip-desc')[i]?.value?.trim()||'';
+    return el.value.trim()?{ip:el.value.trim(),desc}:null;
+  }).filter(Boolean);
+  if(!ips.length)return null;
+  const alteracoes=window._ipAlterado?[...document.querySelectorAll('.ip-alt-row')].map(row=>({
+    anterior:row.querySelector('.ip-ant')?.value?.trim()||'',
+    novo:row.querySelector('.ip-novo-alt')?.value?.trim()||'',
+    desc:row.querySelector('.ip-alt-desc')?.value?.trim()||''
+  })).filter(a=>a.anterior||a.novo):[];
+  return{ips,alterado:window._ipAlterado||false,alteracoes,resumo:window._ipsResumo||''};
 }
 
 function setCL(k,v){
@@ -1172,17 +1285,6 @@ function irPrevia(){
     });
     html+='</div></div>';
   }
-  // Adicionar IPs ao preview se for CFTV
-  const tipos_prev = detectarTipo(OS_ATUAL?.servico||'');
-  if(tipos_prev.includes('CFTV') && typeof getIPsData === 'function'){
-    const ipsPreview = getIPsData();
-    if(ipsPreview && ipsPreview.resumo){
-      html += `<div class="card" style="margin-top:10px;border-left:3px solid var(--pr)">
-        <div class="ch"><span class="ct" style="color:var(--pr)">🌐 IPs da comarca</span></div>
-        <div class="cb" style="font-family:monospace;font-size:12px;white-space:pre-line">${ipsPreview.resumo}</div>
-      </div>`;
-    }
-  }
   q('s4-conteudo').innerHTML=html;
   q('s4-err').style.display='none';
   ir('s4');
@@ -1219,15 +1321,15 @@ async function finalizarOS(){
     });
     const totalFotos=Object.values(fotosCount).reduce((a,b)=>a+b,0);
     const relatorioHTML=gerarRelatorioHTML(o,emailTec,ncs,confs,nas,pecas,fotosCount);
-    const ipsData = typeof getIPsData === 'function' ? getIPsData() : null;
+    const ipsData=typeof getIPsData==='function'?getIPsData():null;
     const retorno={
       tecnico:emailTec,
+      ips_cftv:ipsData,
       dtconc:v('sv-ini')?.slice(0,10)||new Date().toISOString().slice(0,10),
       hora:v('sv-fim')?.slice(11,16)||v('sv-ini')?.slice(11,16)||'',
       servicos:v('sv-det'),solucao:v('sv-sol'),
       pendencias:v('sv-pend'),pend_desc:v('sv-pend-desc'),
       diarias:v('sv-dias')||'0',km:v('sv-km')||'0',garantia:v('sv-gar')||'90',
-      ips_cftv: ipsData,
       medicoes:{rede:v('me-rede'),nb:v('me-nb'),v24:v('me-24'),v5:v('me-5'),emm:v('me-emm')},
       itens_nc:ncs,itens_conf:confs,total_fotos:totalFotos,
       pecas,adm_nome:v('adm-n'),adm_doc:v('adm-d'),obs:v('adm-obs'),
