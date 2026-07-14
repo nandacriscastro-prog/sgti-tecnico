@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GEASI Téc.">
 <meta name="theme-color" content="#0f2744">
-<title>GEASI — Técnico</title><!-- build:1784045466 -->
+<title>GEASI — Técnico</title><!-- build:1784045684 -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -343,6 +343,22 @@ html,body{min-height:100%;background:#1a1a1a;font-family:-apple-system,BlinkMacS
             <div class="fld"><label>Observações finais</label><textarea id="adm-obs" placeholder="Cancelamentos, adequações, recomendações..."></textarea></div>
           </div>
         </div>
+
+        <div class="card">
+          <div class="ch"><span class="ct">✍️ Assinatura do responsável</span></div>
+          <div class="cb">
+            <p style="font-size:12px;color:var(--mu);margin-bottom:10px">Assine abaixo confirmando a execução do serviço</p>
+            <div style="position:relative;border:2px solid var(--bd);border-radius:8px;background:#fff;touch-action:none">
+              <canvas id="sig-canvas" style="display:block;width:100%;height:160px;border-radius:6px;cursor:crosshair"></canvas>
+              <span style="position:absolute;bottom:8px;right:10px;font-size:10px;color:var(--mu);pointer-events:none">Assine aqui</span>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button onclick="sigLimpar()" style="flex:1;background:var(--sf);border:1.5px solid var(--bd);border-radius:6px;padding:8px;cursor:pointer;font-size:12px;color:var(--tx2)">🗑 Limpar</button>
+              <span id="sig-status" style="flex:2;font-size:11px;color:var(--mu);display:flex;align-items:center;padding:0 8px"></span>
+            </div>
+          </div>
+        </div>
+
         <button class="btn bp" onclick="irPrevia()">Próximo — Revisão e prévia →</button>
       </div>
     </div>
@@ -500,6 +516,7 @@ function iniciarApp(nomeOuEmail){
 const SCREENS=['home','os','hist','s1','s2','s3','s4'];
 function ir(id){
   SCREENS.forEach(s=>{ const el=q('sc-'+s);if(el)el.style.display='none';});
+  if(id==='s3'){setTimeout(sigInit,50);}
   const el=q('sc-'+id);if(el)el.style.display=['s1','s2','s3','s4'].includes(id)?'flex':['os','hist'].includes(id)?'block':'block';
   if(['s1','s2','s3','s4'].includes(id)){q('bnav').style.display='none';}
   else{q('bnav').style.display='flex';}
@@ -1157,6 +1174,9 @@ function irPrevia(){
     });
     html+='</div></div>';
   }
+  if(typeof sigGetBase64==='function'&&sigGetBase64()){
+    html+='<div class="card" style="margin-top:10px"><div class="ch"><span class="ct">✍️ Assinatura do responsável</span></div><div class="cb"><img src="'+sigGetBase64()+'" style="max-width:100%;border:1px solid var(--bd);border-radius:6px"></div></div>';
+  }
   q('s4-conteudo').innerHTML=html;
   q('s4-err').style.display='none';
   ir('s4');
@@ -1193,7 +1213,8 @@ async function finalizarOS(){
     });
     const totalFotos=Object.values(fotosCount).reduce((a,b)=>a+b,0);
     const relatorioHTML=gerarRelatorioHTML(o,emailTec,ncs,confs,nas,pecas,fotosCount);
-    var FRAC_D={'3.1.1':0.125,'3.1.2':0.25,'3.1.3':0.375,'3.1.4':0.25,'3.1.5':0.125,'3.1.6':0.125,'3.1.7':0.125,'3.1.8':0.25,'3.1.9':0.25,'3.1.10':0.125,'3.1.11':0.125,'3.1.12':0.125,'3.1.13':0.375,'3.2.1':0.125,'3.2.2':0.125,'3.2.3':0.125,'3.2.4':0.125,'3.2.5':0.125,'3.2.6':0.125,'3.3.1':0.125,'3.3.2':0.125,'3.4':0.188,'3.5.1':0.125,'3.5.2':0.125,'3.5.3':0.125,'3.5.4':0.125,'3.5.5':0.125,'3.5.6':0.125,'3.5.7':0.125,'3.5.8':0.125,'3.6.1':1.0,'3.6.2':1.0,'3.6.3':1.0,'3.6.4':0.00417,'3.7.1':0.125,'3.7.2':0.125,'3.7.3':0.125,'3.7.4':0.125,'3.8.1':0.125,'3.8.2':0.125,'3.8.3':0.125,'3.8.4':0.125,'3.8.5':0.125,'3.8.6':0.125,'3.8.7':0.125,'3.9.1':0.125,'3.9.2':0.125,'3.9.3':0.125,'3.9.4':0.125,'3.9.5':0.25,'3.9.6':0.25,'3.9.7':0.5,'3.9.8':0.25,'3.10':0.75};var _sTp=(OS_ATUAL&&(OS_ATUAL.servico||OS_ATUAL.tipo)||'').toLowerCase();var _fr=(_sTp.indexOf('raio')>=0||_sTp.indexOf('scanner')>=0)?1.25:1.0;var _pcs=document.querySelectorAll('.peca-card');for(var _pi=0;_pi<_pcs.length;_pi++){var _cd=(_pcs[_pi].querySelector('.pc-sel')&&_pcs[_pi].querySelector('.pc-sel').value||'').split('|')[0].trim();var _qt=parseFloat(_pcs[_pi].querySelector('.pc-qtd')&&_pcs[_pi].querySelector('.pc-qtd').value||1)||1;if(FRAC_D[_cd])_fr+=FRAC_D[_cd]*_qt;}document.getElementById('sv-dias').value=Math.round(_fr*1000)/1000;var ipsData=typeof getIPsData==='function'?getIPsData():null;const retorno={tecnico:emailTec,ips_cftv:ipsData,
+    var FRAC_D={'3.1.1':0.125,'3.1.2':0.25,'3.1.3':0.375,'3.1.4':0.25,'3.1.5':0.125,'3.1.6':0.125,'3.1.7':0.125,'3.1.8':0.25,'3.1.9':0.25,'3.1.10':0.125,'3.1.11':0.125,'3.1.12':0.125,'3.1.13':0.375,'3.2.1':0.125,'3.2.2':0.125,'3.2.3':0.125,'3.2.4':0.125,'3.2.5':0.125,'3.2.6':0.125,'3.3.1':0.125,'3.3.2':0.125,'3.4':0.188,'3.5.1':0.125,'3.5.2':0.125,'3.5.3':0.125,'3.5.4':0.125,'3.5.5':0.125,'3.5.6':0.125,'3.5.7':0.125,'3.5.8':0.125,'3.6.1':1.0,'3.6.2':1.0,'3.6.3':1.0,'3.6.4':0.00417,'3.7.1':0.125,'3.7.2':0.125,'3.7.3':0.125,'3.7.4':0.125,'3.8.1':0.125,'3.8.2':0.125,'3.8.3':0.125,'3.8.4':0.125,'3.8.5':0.125,'3.8.6':0.125,'3.8.7':0.125,'3.9.1':0.125,'3.9.2':0.125,'3.9.3':0.125,'3.9.4':0.125,'3.9.5':0.25,'3.9.6':0.25,'3.9.7':0.5,'3.9.8':0.25,'3.10':0.75};var _sTp=(OS_ATUAL&&(OS_ATUAL.servico||OS_ATUAL.tipo)||'').toLowerCase();var _fr=(_sTp.indexOf('raio')>=0||_sTp.indexOf('scanner')>=0)?1.25:1.0;var _pcs=document.querySelectorAll('.peca-card');for(var _pi=0;_pi<_pcs.length;_pi++){var _cd=(_pcs[_pi].querySelector('.pc-sel')&&_pcs[_pi].querySelector('.pc-sel').value||'').split('|')[0].trim();var _qt=parseFloat(_pcs[_pi].querySelector('.pc-qtd')&&_pcs[_pi].querySelector('.pc-qtd').value||1)||1;if(FRAC_D[_cd])_fr+=FRAC_D[_cd]*_qt;}document.getElementById('sv-dias').value=Math.round(_fr*1000)/1000;var ipsData=typeof getIPsData==='function'?getIPsData():null;
+    var sigData=typeof sigGetBase64==='function'?sigGetBase64():null;const retorno={tecnico:emailTec,ips_cftv:ipsData,assinatura_responsavel:sigData,
       dtconc:v('sv-ini')?.slice(0,10)||new Date().toISOString().slice(0,10),
       hora:v('sv-fim')?.slice(11,16)||v('sv-ini')?.slice(11,16)||'',
       servicos:v('sv-det'),solucao:v('sv-sol'),
@@ -1558,6 +1579,60 @@ function getIPsData(){
   var rows=document.querySelectorAll('.ip-alt-row');var alt=[];
   if(window._ipAlterado){for(var j=0;j<rows.length;j++){var a2=rows[j].querySelector('.ip-ant');var n2=rows[j].querySelector('.ip-novo-alt');var d2=rows[j].querySelector('.ip-alt-desc');if((a2&&a2.value)||(n2&&n2.value)){alt.push({anterior:a2?a2.value:'',novo:n2?n2.value:'',desc:d2?d2.value:''});}}}
   return{ips:ips,alterado:window._ipAlterado||false,alteracoes:alt,resumo:window._ipsResumo||''};
+}
+
+// === Assinatura do responsável ===
+var _sigDrawing = false;
+var _sigHasDraw = false;
+
+function sigInit(){
+  var canvas = document.getElementById('sig-canvas');
+  if(!canvas) return;
+  // Ajustar resolução do canvas ao tamanho real
+  var rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * window.devicePixelRatio;
+  canvas.height = rect.height * window.devicePixelRatio;
+  var ctx = canvas.getContext('2d');
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  ctx.strokeStyle = '#1a1a2e';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  _sigDrawing = false;
+  _sigHasDraw = false;
+
+  function getPos(e){
+    var r = canvas.getBoundingClientRect();
+    var src = e.touches ? e.touches[0] : e;
+    return {x: (src.clientX - r.left), y: (src.clientY - r.top)};
+  }
+  function start(e){ e.preventDefault(); _sigDrawing=true; var p=getPos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }
+  function move(e){ e.preventDefault(); if(!_sigDrawing) return; var p=getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); _sigHasDraw=true; var st=document.getElementById('sig-status'); if(st) st.textContent='✓ Assinatura capturada'; }
+  function end(e){ e.preventDefault(); _sigDrawing=false; }
+
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  canvas.addEventListener('mouseup', end);
+  canvas.addEventListener('mouseleave', end);
+  canvas.addEventListener('touchstart', start, {passive:false});
+  canvas.addEventListener('touchmove', move, {passive:false});
+  canvas.addEventListener('touchend', end);
+}
+
+function sigLimpar(){
+  var canvas = document.getElementById('sig-canvas');
+  if(!canvas) return;
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  _sigHasDraw = false;
+  var st = document.getElementById('sig-status');
+  if(st) st.textContent = '';
+}
+
+function sigGetBase64(){
+  var canvas = document.getElementById('sig-canvas');
+  if(!canvas || !_sigHasDraw) return null;
+  return canvas.toDataURL('image/png');
 }
 
 </script>
