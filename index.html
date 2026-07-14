@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GEASI Téc.">
 <meta name="theme-color" content="#0f2744">
-<title>GEASI — Técnico</title><!-- build:1784053523 -->
+<title>GEASI — Técnico</title><!-- build:1784055278 -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -272,7 +272,7 @@ html,body{min-height:100%;background:#0f1f12;font-family:-apple-system,BlinkMacS
           </div>
         </div>
         
-        <button class="btn bp" onclick="ir('s2')">Próximo — Checklist →</button>
+        <button class="btn bp" onclick="ir('s2')">Próximo: Checklist →</button>
       </div>
     </div>
 
@@ -297,13 +297,13 @@ html,body{min-height:100%;background:#0f1f12;font-family:-apple-system,BlinkMacS
         <div class="card">
           <div class="ch"><span class="ct">📝 Serviços realizados</span></div>
           <div class="cb">
-            <div class="fld"><label>Detalhamento <span style="color:var(--rd)">*</span></label><textarea id="sv-det" placeholder="Gerado automaticamente pelo checklist — edite se necessário..." style="min-height:90px"></textarea></div>
+            <div class="fld"><label>Detalhamento <span style="color:var(--rd)">*</span></label><textarea id="sv-det" placeholder="Gerado automaticamente pelo checklist, edite se necessário..." style="min-height:90px"></textarea></div>
             <div class="fld"><label>Solução adotada</label><textarea id="sv-sol" placeholder="Qual foi a solução aplicada?"></textarea></div>
             <div class="fr">
               <div class="fld"><label>Pendências?</label>
                 <select id="sv-pend" onchange="document.getElementById('sv-pend-f').style.display=this.value==='sim'?'block':'none'">
-                  <option value="nao">Não — concluído</option>
-                  <option value="sim">Sim — há pendências</option>
+                  <option value="nao">Não, concluído</option>
+                  <option value="sim">Sim, há pendências</option>
                 </select>
               </div>
               <div class="fld"><label>Garantia (dias)</label><input type="number" id="sv-gar" value="90" min="0"></div>
@@ -311,7 +311,7 @@ html,body{min-height:100%;background:#0f1f12;font-family:-apple-system,BlinkMacS
             <div id="sv-pend-f" style="display:none" class="fld"><label>Descrição das pendências</label><textarea id="sv-pend-desc"></textarea></div>
           </div>
         </div>
-        <button class="btn bp" onclick="var _bl=document.getElementById('ip-bloco');if(_bl){var _ii=document.querySelectorAll('.ip-inp');var _found=false;for(var _xi=0;_xi<_ii.length;_xi++)if(_ii[_xi].value.trim()){_found=true;break;}if(!_found){_bl.style.border='2px solid var(--rd)';_bl.scrollIntoView({behavior:'smooth'});toast('Informe ao menos 1 IP (obrigatorio para CFTV)','error');return;}}ir('s3');">Próximo — Período e responsável →</button>
+        <button class="btn bp" onclick="var _bl=document.getElementById('ip-bloco');if(_bl){var _ii=document.querySelectorAll('.ip-inp');var _found=false;for(var _xi=0;_xi<_ii.length;_xi++)if(_ii[_xi].value.trim()){_found=true;break;}if(!_found){_bl.style.border='2px solid var(--rd)';_bl.scrollIntoView({behavior:'smooth'});toast('Informe ao menos 1 IP (obrigatorio para CFTV)','error');return;}}ir('s3');">Próximo: Período e responsável →</button>
       </div>
     </div>
 
@@ -368,7 +368,7 @@ html,body{min-height:100%;background:#0f1f12;font-family:-apple-system,BlinkMacS
           </div>
         </div>
 
-        <button class="btn bp" onclick="irPrevia()">Próximo — Revisão e prévia →</button>
+        <button class="btn bp" onclick="irPrevia()">Próximo: Revisão e prévia →</button>
       </div>
     </div>
 
@@ -846,7 +846,7 @@ function buildPainelNC(k,painel){
   const prob=CL_DEFS[tipo]?.problemas[idx]||k;
   painel.innerHTML='';
   painel.className='ncpanel';
-  const titulo=h('div','ncpanel-title','❌ Não Conforme — '+prob);
+  const titulo=h('div','ncpanel-title','❌ Não Conforme: '+prob);
   painel.appendChild(titulo);
   // Fotos lado a lado
   const fotoGrid=h('div','');
@@ -934,7 +934,7 @@ function addPeca(wrapId,codPre='',descPre=''){
   </div>
   <div class="fld"><label>Item do Anexo V</label>
     <select class="pc-sel" onchange="preencherAnexo(this,'${pid}')">
-      <option value="">— Selecione da lista do contrato —</option>${opts}
+      <option value="">Selecione da lista do contrato</option>${opts}
     </select>
   </div>
   <div class="fld"><label>Componente / Descrição <span style="color:var(--rd)">*</span></label>
