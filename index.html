@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GEASI Téc.">
 <meta name="theme-color" content="#0f2744">
-<title>GEASI — Técnico</title><!-- build:1784044418 -->
+<title>GEASI — Técnico</title><!-- build:1784045466 -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -1488,6 +1488,8 @@ document.addEventListener('input',e=>{
   if(_ls.access_token&&_ls.access_token.startsWith('local-')){SESSION=_ls;iniciarApp(_ls.nome||'Técnico');}else{q('login').style.display='flex';}
   },1500);
 
+})();
+
 function renderIPsCFTV(cont){
   var card=document.createElement('div');card.className='card';card.style.cssText='margin-bottom:10px;border:2px solid var(--pr)';
   var hdr=document.createElement('div');hdr.className='ch';
@@ -1558,7 +1560,6 @@ function getIPsData(){
   return{ips:ips,alterado:window._ipAlterado||false,alteracoes:alt,resumo:window._ipsResumo||''};
 }
 
-})();
 </script>
 </body>
 </html>
