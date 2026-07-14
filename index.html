@@ -302,7 +302,18 @@ html,body{min-height:100%;background:#1a1a1a;font-family:-apple-system,BlinkMacS
             <div id="sv-pend-f" style="display:none" class="fld"><label>Descrição das pendências</label><textarea id="sv-pend-desc"></textarea></div>
           </div>
         </div>
-        <button class="btn bp" onclick="ir('s3')">Próximo — Período e responsável →</button>
+        <button class="btn bp" onclick="
+  const tipos=detectarTipo(OS_ATUAL?.servico||'');
+  if(tipos.includes('CFTV')){
+    const ips=[...document.querySelectorAll('.ip-inp')].filter(el=>el.value.trim());
+    if(!ips.length){
+      const bl=document.getElementById('ip-bloco');
+      if(bl){bl.style.border='2px solid var(--rd)';bl.scrollIntoView({behavior:'smooth',block:'center'});}
+      toast('⚠️ Informe pelo menos 1 IP registrado na comarca','error');return;
+    }
+  }
+  ir('s3');
+">Próximo — Período e responsável →</button>
       </div>
     </div>
 
@@ -1158,6 +1169,17 @@ function irPrevia(){
     });
     html+='</div></div>';
   }
+  // Adicionar IPs ao preview se for CFTV
+  const tipos_prev = detectarTipo(OS_ATUAL?.servico||'');
+  if(tipos_prev.includes('CFTV') && typeof getIPsData === 'function'){
+    const ipsPreview = getIPsData();
+    if(ipsPreview && ipsPreview.resumo){
+      html += `<div class="card" style="margin-top:10px;border-left:3px solid var(--pr)">
+        <div class="ch"><span class="ct" style="color:var(--pr)">🌐 IPs da comarca</span></div>
+        <div class="cb" style="font-family:monospace;font-size:12px;white-space:pre-line">${ipsPreview.resumo}</div>
+      </div>`;
+    }
+  }
   q('s4-conteudo').innerHTML=html;
   q('s4-err').style.display='none';
   ir('s4');
@@ -1194,6 +1216,7 @@ async function finalizarOS(){
     });
     const totalFotos=Object.values(fotosCount).reduce((a,b)=>a+b,0);
     const relatorioHTML=gerarRelatorioHTML(o,emailTec,ncs,confs,nas,pecas,fotosCount);
+    const ipsData = typeof getIPsData === 'function' ? getIPsData() : null;
     const retorno={
       tecnico:emailTec,
       dtconc:v('sv-ini')?.slice(0,10)||new Date().toISOString().slice(0,10),
@@ -1201,6 +1224,7 @@ async function finalizarOS(){
       servicos:v('sv-det'),solucao:v('sv-sol'),
       pendencias:v('sv-pend'),pend_desc:v('sv-pend-desc'),
       diarias:v('sv-dias')||'0',km:v('sv-km')||'0',garantia:v('sv-gar')||'90',
+      ips_cftv: ipsData,
       medicoes:{rede:v('me-rede'),nb:v('me-nb'),v24:v('me-24'),v5:v('me-5'),emm:v('me-emm')},
       itens_nc:ncs,itens_conf:confs,total_fotos:totalFotos,
       pecas,adm_nome:v('adm-n'),adm_doc:v('adm-d'),obs:v('adm-obs'),
