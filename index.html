@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GEASI Téc.">
 <meta name="theme-color" content="#0f2744">
-<title>GEASI — Técnico</title><!-- build:1784055502 -->
+<title>GEASI — Técnico</title><!-- build:1784055759 -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -90,7 +90,8 @@ html,body{min-height:100%;background:#0f1f12;font-family:-apple-system,BlinkMacS
 .clb{width:40px;height:40px;border-radius:50%;border:2px solid var(--bd);background:var(--sf);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
 .clb.conf{background:var(--pr);border-color:var(--pr);color:#fff;box-shadow:0 3px 10px rgba(26,107,60,.3)}
 .clb.nc{background:var(--rd);border-color:var(--rd);color:#fff;box-shadow:0 3px 10px rgba(192,57,43,.3)}
-.clb.na{background:#f3f4f6;border-color:#d1d5db;color:#9ca3af}
+.clb.na{background:#e5e7eb;border-color:#6b7280;color:#374151;box-shadow:0 2px 6px rgba(107,114,128,.25)}
+.clb[id^="b-na-"]{font-size:11px;font-weight:800}
 /* NC PANEL */
 .ncpanel{background:#fff5f5;border:1.5px solid #fca5a5;border-radius:0 0 10px 10px;padding:14px;margin-bottom:8px}
 .ncpanel-title{font-size:11px;font-weight:800;color:var(--rd);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
@@ -290,6 +291,7 @@ html,body{min-height:100%;background:#0f1f12;font-family:-apple-system,BlinkMacS
         <div class="sd td">4</div>
       </div>
       <div class="scr">
+        <div id="s2-pend-bar" style="display:none;background:#fff5f5;color:#c0392b;border:1px solid #f5c2bb;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;margin-bottom:10px"></div>
         <div id="s2-cl"></div>
 
         
@@ -768,6 +770,12 @@ function renderChecklist(serv){
     // Header com contador
     const hdDiv=h('div','ch','');
     hdDiv.innerHTML=`<span class="ct">📋 ${def.titulo}</span><span id="cnt-${tipo}" class="badge bgr">0/${totalProbs}</span>`;
+    const btnTudo=h('button','','✓ Marcar tudo conforme');
+    btnTudo.type='button';
+    btnTudo.style.cssText='margin-left:auto;background:none;border:1.5px solid var(--pr);color:var(--pr);border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap';
+    btnTudo.onclick=()=>marcarTudoConforme(tipo);
+    hdDiv.style.display='flex';hdDiv.style.alignItems='center';hdDiv.style.gap='8px';
+    hdDiv.appendChild(btnTudo);
     card.appendChild(hdDiv);
     const body=h('div','cb','');
     def.problemas.forEach((prob,i)=>{
@@ -780,7 +788,7 @@ function renderChecklist(serv){
         <div class="cli-btns">
           <button class="clb" id="b-conf-${k}" onclick="setCL('${k}','conf')" title="Conforme">✓</button>
           <button class="clb" id="b-nc-${k}" onclick="setCL('${k}','nc')" title="Não Conforme">✕</button>
-          <button class="clb" id="b-na-${k}" onclick="setCL('${k}','na')" title="Não se aplica">—</button>
+          <button class="clb" id="b-na-${k}" onclick="setCL('${k}','na')" title="Não se aplica">N/A</button>
         </div>`;
       wrap.appendChild(row);
       // Painel NC (oculto por padrão)
@@ -794,6 +802,15 @@ function renderChecklist(serv){
     cont.appendChild(card);
   });
   if(tipos.includes('CFTV')&&typeof renderIPsCFTV==='function')renderIPsCFTV(cont);
+  atualizarBarraPendencias();
+}
+
+function marcarTudoConforme(tipo){
+  const def=CL_DEFS[tipo];if(!def)return;
+  def.problemas.forEach((_,i)=>{
+    const k=tipo+'_'+i;
+    if(!CL_EST[k])setCL(k,'conf');
+  });
 }
 
 function setCL(k,v){
@@ -836,6 +853,7 @@ function setCL(k,v){
   }
   // Atualizar resumo de serviços
   gerarResumo();
+  atualizarBarraPendencias();
   salvarRascunho();
 }
 
@@ -895,6 +913,7 @@ function capturar(slot,tipo,gridId){
       slot.innerHTML=`<img src="${e.target.result}"><button class="rm" onclick="rmFoto(event,this.parentElement,'${tipo}','${gridId}')">×</button>`;
       slot.onclick=null;
       atualizarBadgeFoto(tipo);
+      atualizarBarraPendencias();
       addSlot(gridId,tipo);
     };r.readAsDataURL(this.files[0]);
   };inp.click();
@@ -904,7 +923,25 @@ function rmFoto(e,slot,tipo,gridId){
   slot.className='ps';slot.innerHTML='+';
   slot.onclick=function(){capturar(this,tipo,gridId);};
   atualizarBadgeFoto(tipo);
+  atualizarBarraPendencias();
 }
+function atualizarBarraPendencias(){
+  const bar=q('s2-pend-bar');if(!bar)return;
+  let faltam=0;
+  Object.keys(CL_EST).forEach(k=>{
+    if(CL_EST[k]!=='nc')return;
+    const ft=contarFotosPorKey(k);
+    if(ft.antes===0)faltam++;
+    if(ft.depois===0)faltam++;
+  });
+  if(faltam>0){
+    bar.style.display='block';
+    bar.textContent='⚠️ '+faltam+' foto'+(faltam>1?'s':'')+' obrigatória'+(faltam>1?'s':'')+' pendente'+(faltam>1?'s':'')+' nos itens não conformes';
+  } else {
+    bar.style.display='none';
+  }
+}
+
 function atualizarBadgeFoto(tipo){
   const isAntes=tipo.startsWith('a-');
   const k=tipo.replace(/^[ad]-/,'');
