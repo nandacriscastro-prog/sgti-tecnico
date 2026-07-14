@@ -502,7 +502,10 @@ function doLogout(){
 }
 function iniciarApp(nomeOuEmail){
   q('login').style.display='none';q('app').style.display='flex';
-  const nome=nomeOuEmail.includes('@')?nomeOuEmail.split('@')[0].replace(/\./g,' '):nomeOuEmail;
+  const _noe = nomeOuEmail || SESSION?.nome || SESSION?.email || 'Técnico';
+  const nome = typeof _noe === 'string' && _noe.includes('@')
+    ? _noe.split('@')[0].replace(/\./g,' ')
+    : _noe;
   q('hm-nome').textContent=nome;
   q('hdr-av').textContent=nome[0].toUpperCase();
   q('hm-data').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
@@ -1505,7 +1508,7 @@ document.addEventListener('input',e=>{
   if(saved){
     try{
       const s=JSON.parse(saved);SESSION=s;
-      renovarToken().finally(()=>iniciarApp(s.email));
+      renovarToken().finally(()=>iniciarApp(s.nome||s.email||'Técnico'));
     }catch(e){localStorage.removeItem('geasi_ses');}
   }
   setTimeout(()=>{
