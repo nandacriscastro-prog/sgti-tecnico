@@ -1024,10 +1024,22 @@ function contarFotosPorKey(k){
 }
 
 /* ── PEÇAS ── */
+const GRUPOS_POR_TIPO={
+  CFTV:['CFTV','Videomonitoramento','Videomonitoramento IP','Infraestrutura'],
+  PREV_CFTV:['CFTV','Videomonitoramento','Videomonitoramento IP','Infraestrutura'],
+  ALARME:['Alarme','Infraestrutura','Outros'],
+  PREV_ALARME:['Alarme','Infraestrutura','Outros'],
+  PORTAL:['Portal'],
+  RAIO:['Scanner'],
+  ACESSO:['Cancela','Acesso']
+};
 function addPeca(wrapId,codPre='',descPre=''){
   const wrap=q(wrapId);if(!wrap)return;
   const pid='pc_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
-  const opts=ITENS_DEMANDA.map(it=>`<option value="${it.cod}|${it.desc}">[${it.cod}] ${it.desc} (${it.grp})</option>`).join('');
+  const tipos=detectarTipo(OS_ATUAL?.servico||'');
+  const gruposPermitidos=new Set(tipos.flatMap(t=>GRUPOS_POR_TIPO[t]||[]));
+  const itensFiltrados=gruposPermitidos.size?ITENS_DEMANDA.filter(it=>gruposPermitidos.has(it.grp)):ITENS_DEMANDA;
+  const opts=itensFiltrados.map(it=>`<option value="${it.cod}|${it.desc}">[${it.cod}] ${it.desc} (${it.grp})</option>`).join('');
   const d=h('div','peca-card','');d.id=pid;
   d.innerHTML=`<div class="peca-card-hd">Componente
     <button onclick="document.getElementById('${pid}').remove();gerarResumo();salvarRascunho();" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;line-height:1">×</button>
