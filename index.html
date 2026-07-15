@@ -684,9 +684,23 @@ function renderHist(){
       <div class="ostags" style="margin-top:6px">
         <span class="badge bgr" style="font-size:10px">📅 Concluído: ${dtConc}${horaConc?' às '+horaConc:''}</span>
         ${retorno?.tecnico?`<span class="badge bgr" style="font-size:10px">👤 ${retorno.tecnico.split('@')[0]}</span>`:''}
-      </div>`;
+      </div>
+      ${retorno?.relatorio_html?`<button class="bsm" style="width:100%;margin-top:8px;background:var(--nv);color:#fff;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer" onclick="baixarRelatorioPDF('${o.numero}')">📄 Baixar relatório (PDF)</button>`:''}`;
     c.appendChild(el);
   });
+}
+function baixarRelatorioPDF(numero){
+  const o=OS_CONC.find(x=>x.numero===numero);
+  if(!o)return;
+  let retorno=null;
+  try{retorno=o.retorno_campo?JSON.parse(o.retorno_campo):null;}catch(e){}
+  if(!retorno?.relatorio_html){toast('Relatório não disponível para esta OS.','error');return;}
+  const w=window.open('','_blank');
+  if(!w){toast('Permita pop-ups para baixar o relatório.','error');return;}
+  w.document.write(retorno.relatorio_html);
+  w.document.close();
+  w.document.title='Relatório OS '+numero;
+  setTimeout(()=>{try{w.focus();w.print();}catch(e){}},400);
 }
 
 /* ── ABRIR OS ── */
