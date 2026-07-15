@@ -586,15 +586,24 @@ function renderRascunhosHome(){
   cont.innerHTML=`<div class="card" style="border:1.5px solid var(--am);background:#fffaf0;margin-bottom:10px">
     <div class="ch"><span class="ct">✏️ Em andamento (${emAndamento.length})</span></div>
     <div class="cb">${emAndamento.map(o=>`
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)">
-        <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd);gap:8px">
+        <div style="min-width:0">
           <div style="font-weight:700;font-size:13px">OS ${o.numero}</div>
           <div style="font-size:11px;color:var(--mu)">${o.comarca||'—'} · ${(o.servico||'').substring(0,40)}</div>
         </div>
-        <button class="bsm" style="background:var(--am);color:#fff;border:none;border-radius:7px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer" onclick="abrirOS('${o.numero}', true)">Continuar</button>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button class="bsm" style="background:var(--am);color:#fff;border:none;border-radius:7px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer" onclick="abrirOS('${o.numero}', true)">Continuar</button>
+          <button class="bsm" title="Excluir rascunho" style="background:#fff;color:var(--br,#c0392b);border:1.5px solid var(--br,#c0392b);border-radius:7px;padding:7px 10px;font-size:14px;font-weight:700;cursor:pointer" onclick="excluirRascunhoHome('${o.numero}')">🗑️</button>
+        </div>
       </div>`).join('')}
     </div>
   </div>`;
+}
+function excluirRascunhoHome(numero){
+  if(!confirm('Excluir o rascunho da OS '+numero+'? Tudo que foi preenchido nessa visita será perdido.'))return;
+  localStorage.removeItem('rascunho_'+numero);
+  renderRascunhosHome();
+  if(typeof atualizarStats==='function')atualizarStats();
 }
 
 function calcPrazo(o){
