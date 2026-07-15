@@ -704,9 +704,24 @@ function baixarRelatorioPDF(numero){
 }
 
 /* ── ABRIR OS ── */
+function capturarGeoSilencioso(numero){
+  if(!navigator.geolocation)return;
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      try{
+        localStorage.setItem('geo_abertura_'+numero, JSON.stringify({
+          lat:pos.coords.latitude, lng:pos.coords.longitude,
+          acc:pos.coords.accuracy, ts:new Date().toISOString()
+        }));
+      }catch(e){}
+    },
+    ()=>{}, {enableHighAccuracy:true,timeout:10000,maximumAge:60000}
+  );
+}
 function abrirOS(num, resumirDireto){
   OS_ATUAL=OS_ATIVAS.find(o=>o.numero===num);
   if(!OS_ATUAL)return;
+  capturarGeoSilencioso(num);
   CL_EST={};
   // Reset campos
   ['sv-det','sv-sol','sv-pend-desc','adm-n','adm-d','adm-obs','me-rede','me-nb','me-24','me-5','me-emm'].forEach(id=>{const el=q(id);if(el)el.value='';});
@@ -1337,7 +1352,18 @@ async function finalizarOS(){
     const totalFotos=Object.values(fotosCount).reduce((a,b)=>a+b,0);
     const relatorioHTML=gerarRelatorioHTML(o,emailTec,ncs,confs,nas,pecas,fotosCount);
     var FRAC_D={'3.1.1':0.125,'3.1.2':0.25,'3.1.3':0.375,'3.1.4':0.25,'3.1.5':0.125,'3.1.6':0.125,'3.1.7':0.125,'3.1.8':0.25,'3.1.9':0.25,'3.1.10':0.125,'3.1.11':0.125,'3.1.12':0.125,'3.1.13':0.375,'3.2.1':0.125,'3.2.2':0.125,'3.2.3':0.125,'3.2.4':0.125,'3.2.5':0.125,'3.2.6':0.125,'3.3.1':0.125,'3.3.2':0.125,'3.4':0.188,'3.5.1':0.125,'3.5.2':0.125,'3.5.3':0.125,'3.5.4':0.125,'3.5.5':0.125,'3.5.6':0.125,'3.5.7':0.125,'3.5.8':0.125,'3.6.1':1.0,'3.6.2':1.0,'3.6.3':1.0,'3.6.4':0.0041667,'3.7.1':0.125,'3.7.2':0.125,'3.7.3':0.125,'3.7.4':0.125,'3.8.1':0.125,'3.8.2':0.125,'3.8.3':0.125,'3.8.4':0.125,'3.8.5':0.125,'3.8.6':0.125,'3.8.7':0.125,'3.9.1':0.125,'3.9.2':0.125,'3.9.3':0.125,'3.9.4':0.125,'3.9.5':0.25,'3.9.6':0.25,'3.9.7':0.5,'3.9.8':0.25,'3.10':0.75};var _sTp=(OS_ATUAL&&(OS_ATUAL.servico||OS_ATUAL.tipo)||'').toLowerCase();var _fr=(_sTp.indexOf('raio')>=0||_sTp.indexOf('scanner')>=0)?1.25:1.0;var _pcs=document.querySelectorAll('.peca-card');for(var _pi=0;_pi<_pcs.length;_pi++){var _cd=(_pcs[_pi].querySelector('.pc-sel')&&_pcs[_pi].querySelector('.pc-sel').value||'').split('|')[0].trim();var _qt=parseFloat(_pcs[_pi].querySelector('.pc-qtd')&&_pcs[_pi].querySelector('.pc-qtd').value||1)||1;if(FRAC_D[_cd])_fr+=FRAC_D[_cd]*_qt;}document.getElementById('sv-dias').value=Math.round(_fr*1000)/1000;var ipsData=typeof getIPsData==='function'?getIPsData():null;
-    var sigData=typeof sigGetBase64==='function'?sigGetBase64():null;const retorno={tecnico:emailTec,ips_cftv:ipsData,assinatura_responsavel:sigData,
+    var sigData=typeof sigGetBase64==='function'?sigGetBase64():null;
+    var geoAbertura=null;
+    try{const gs=localStorage.getItem('geo_abertura_'+o.numero);if(gs)geoAbertura=JSON.parse(gs);}catch(e){}
+    var geoFinalizacao=await new Promise(resolve=>{
+      if(!navigator.geolocation){resolve(null);return;}
+      navigator.geolocation.getCurrentPosition(
+        pos=>resolve({lat:pos.coords.latitude,lng:pos.coords.longitude,acc:pos.coords.accuracy,ts:new Date().toISOString()}),
+        ()=>resolve(null), {enableHighAccuracy:true,timeout:10000,maximumAge:60000}
+      );
+    });
+    const retorno={tecnico:emailTec,ips_cftv:ipsData,assinatura_responsavel:sigData,
+      geo_abertura:geoAbertura, geo_finalizacao:geoFinalizacao,
       dtconc:v('sv-ini')?.slice(0,10)||localISODate(),
       hora:v('sv-fim')?.slice(11,16)||v('sv-ini')?.slice(11,16)||'',
       servicos:v('sv-det'),solucao:v('sv-sol'),
@@ -1348,6 +1374,7 @@ async function finalizarOS(){
       pecas,adm_nome:v('adm-n'),adm_doc:v('adm-d'),obs:v('adm-obs'),
       relatorio_html:relatorioHTML,
     };
+    try{localStorage.removeItem('geo_abertura_'+o.numero);}catch(e){}
     await sbFetch('/rest/v1/ordens_servico?numero=eq.'+encodeURIComponent(o.numero),{
       method:'PATCH',
       body:JSON.stringify({retorno_campo:JSON.stringify(retorno),status:'Concluída',data_conclusao:retorno.dtconc||null})
