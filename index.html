@@ -1355,12 +1355,15 @@ async function finalizarOS(){
     var sigData=typeof sigGetBase64==='function'?sigGetBase64():null;
     var geoAbertura=null;
     try{const gs=localStorage.getItem('geo_abertura_'+o.numero);if(gs)geoAbertura=JSON.parse(gs);}catch(e){}
-    var geoFinalizacao=await new Promise(resolve=>{
-      if(!navigator.geolocation){resolve(null);return;}
+    var geoFinalizacao=await new Promise((resolve,reject)=>{
+      if(!navigator.geolocation){reject(new Error('GEO_INDISPONIVEL'));return;}
       navigator.geolocation.getCurrentPosition(
         pos=>resolve({lat:pos.coords.latitude,lng:pos.coords.longitude,acc:pos.coords.accuracy,ts:new Date().toISOString()}),
-        ()=>resolve(null), {enableHighAccuracy:true,timeout:10000,maximumAge:60000}
+        ()=>reject(new Error('GEO_NEGADA')), {enableHighAccuracy:true,timeout:15000,maximumAge:60000}
       );
+    }).catch(err=>{throw new Error(err.message==='GEO_NEGADA'
+      ? 'É necessário permitir o acesso à localização do celular para concluir a OS. Ative o GPS e a permissão de localização deste site, depois tente novamente.'
+      : 'Não foi possível obter a localização do celular. Verifique se o GPS está ativado e tente novamente.');
     });
     const retorno={tecnico:emailTec,ips_cftv:ipsData,assinatura_responsavel:sigData,
       geo_abertura:geoAbertura, geo_finalizacao:geoFinalizacao,
