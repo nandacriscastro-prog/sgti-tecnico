@@ -222,6 +222,7 @@ html,body{min-height:100%;background:#0f1f12;font-family:-apple-system,BlinkMacS
         <div class="sb" style="border-left:2px solid var(--am)"><div class="sn" id="st-rd" style="color:var(--am)">0</div><div class="sl2">Reabertas</div></div>
       </div>
       <button class="btn bp" onclick="ir('os')">📋 Ver OS abertas</button>
+      <div id="fila-pendente-banner"></div>
       <div id="home-rascunhos"></div>
       <button class="btn bo" onclick="ir('hist')">✅ Histórico concluídas</button>
       <button class="btn bo" onclick="doLogout()" style="color:var(--rd);border-color:var(--rdl)">Sair</button>
@@ -590,6 +591,7 @@ function atualizarStats(){
   q('st-co').textContent=OS_CONC.length;
   q('st-rd').textContent=OS_ATIVAS.filter(o=>o.status==='Reaberta').length;
   renderRascunhosHome();
+  renderFilaPendenteBanner();
 }
 function renderRascunhosHome(){
   const cont=q('home-rascunhos');
@@ -1164,6 +1166,55 @@ function gerarResumo(){
   if(ta&&!ta.dataset.editado)ta.value=linhas.join('\n');
 }
 
+/* ── FILA DE ENVIO OFFLINE ── */
+function salvarNaFilaEnvio(numero,corpo){
+  try{
+    const fila=JSON.parse(localStorage.getItem('fila_envio_pendente')||'[]');
+    fila.push({numero,corpo,ts:Date.now()});
+    localStorage.setItem('fila_envio_pendente',JSON.stringify(fila));
+  }catch(e){}
+}
+async function tentarSincronizarFila(silencioso){
+  let fila=[];
+  try{fila=JSON.parse(localStorage.getItem('fila_envio_pendente')||'[]');}catch(e){}
+  if(!fila.length)return;
+  if(!navigator.onLine)return;
+  const restantes=[];
+  let enviados=0;
+  for(const item of fila){
+    try{
+      await sbFetch('/rest/v1/ordens_servico?numero=eq.'+encodeURIComponent(item.numero),{
+        method:'PATCH',
+        body:JSON.stringify(item.corpo)
+      });
+      enviados++;
+    }catch(e){
+      restantes.push(item);
+    }
+  }
+  localStorage.setItem('fila_envio_pendente',JSON.stringify(restantes));
+  if(enviados>0){
+    if(!silencioso)toast('✓ '+enviados+' relatório(s) pendente(s) enviado(s) com sucesso!');
+    renderFilaPendenteBanner();
+  }
+}
+function renderFilaPendenteBanner(){
+  const cont=q('fila-pendente-banner');if(!cont)return;
+  let fila=[];
+  try{fila=JSON.parse(localStorage.getItem('fila_envio_pendente')||'[]');}catch(e){}
+  if(!fila.length){cont.innerHTML='';return;}
+  cont.innerHTML=`<div class="card" style="border:1.5px solid var(--am);background:#fffaf0;margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <div style="font-size:12px"><b>📴 ${fila.length} relatório(s) sem enviar</b><br>
+        <span style="color:var(--mu)">Salvos no celular, aguardando internet</span></div>
+      <button class="bsm" style="background:var(--am);color:#fff;border:none;border-radius:7px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer" onclick="tentarSincronizarFila()">Sincronizar agora</button>
+    </div>
+  </div>`;
+}
+window.addEventListener('online',()=>tentarSincronizarFila(true));
+setInterval(()=>tentarSincronizarFila(true),60000);
+try{renderFilaPendenteBanner();}catch(e){}
+
 /* ── RASCUNHO ── */
 function salvarRascunho(){
   if(!OS_ATUAL)return;
@@ -1436,16 +1487,30 @@ async function finalizarOS(){
       relatorio_html:relatorioHTML,
     };
     try{localStorage.removeItem('geo_abertura_'+o.numero);}catch(e){}
-    await sbFetch('/rest/v1/ordens_servico?numero=eq.'+encodeURIComponent(o.numero),{
-      method:'PATCH',
-      body:JSON.stringify({retorno_campo:JSON.stringify(retorno),status:'Concluída',data_conclusao:retorno.dtconc||null})
-    });
-    OS_ATIVAS=OS_ATIVAS.filter(x=>x.numero!==o.numero);
-    OS_CONC.unshift({...o,status:'Concluída'});
-    localStorage.removeItem('rascunho_'+o.numero);
-    atualizarStats();
-    toast('✓ OS '+o.numero+' enviada com sucesso!');
-    setTimeout(()=>ir('home'),1200);
+    const corpoEnvio={retorno_campo:JSON.stringify(retorno),status:'Concluída',data_conclusao:retorno.dtconc||null};
+    try{
+      await sbFetch('/rest/v1/ordens_servico?numero=eq.'+encodeURIComponent(o.numero),{
+        method:'PATCH',
+        body:JSON.stringify(corpoEnvio)
+      });
+      OS_ATIVAS=OS_ATIVAS.filter(x=>x.numero!==o.numero);
+      OS_CONC.unshift({...o,status:'Concluída',retorno_campo:corpoEnvio.retorno_campo});
+      localStorage.removeItem('rascunho_'+o.numero);
+      atualizarStats();
+      toast('✓ OS '+o.numero+' enviada com sucesso!');
+      setTimeout(()=>ir('home'),1200);
+    }catch(errEnvio){
+      const semRede=!navigator.onLine || /Failed to fetch|NetworkError|network/i.test(errEnvio.message||'');
+      if(!semRede)throw errEnvio;
+      // Sem conexão: guarda na fila local pra enviar depois, sem perder o relatório já feito
+      salvarNaFilaEnvio(o.numero, corpoEnvio);
+      OS_ATIVAS=OS_ATIVAS.filter(x=>x.numero!==o.numero);
+      OS_CONC.unshift({...o,status:'Concluída',retorno_campo:corpoEnvio.retorno_campo,_pendenteSync:true});
+      localStorage.removeItem('rascunho_'+o.numero);
+      atualizarStats();
+      toast('📴 Sem conexão — relatório salvo no celular e será enviado assim que a internet voltar.',4500);
+      setTimeout(()=>ir('home'),1600);
+    }
   }catch(e){
     q('s4-err').textContent='Erro ao enviar: '+e.message;q('s4-err').style.display='block';
   }finally{btn.innerHTML='✅ Confirmar e enviar OS';btn.disabled=false;}
