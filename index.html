@@ -1395,6 +1395,7 @@ async function finalizarOS(){
 
 /* ── RELATÓRIO HTML ── */
 function gerarRelatorioHTML(o,tecnico,ncs,confs,nas,pecas,fotosCount){
+  const sigB64=typeof sigGetBase64==='function'?sigGetBase64():null;
   const dtHoje=new Date().toLocaleDateString('pt-BR');
   const dtOS=o.data_os?new Date(o.data_os+'T12:00').toLocaleDateString('pt-BR'):dtHoje;
   const ini=v('sv-ini'),fim=v('sv-fim');
@@ -1622,8 +1623,9 @@ function gerarRelatorioHTML(o,tecnico,ncs,confs,nas,pecas,fotosCount){
       ${admObs?`<div style="background:#f8f9fc;border:1px solid #e0e4ed;border-radius:4px;padding:8px 10px;font-size:12px;margin-bottom:14px"><b>Observações:</b> ${admObs}</div>`:''}
       <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:8px">
         <tr>
-          <td style="width:50%;padding:40px 10px 8px;border-top:1.5px solid #0f2744;text-align:center;font-size:11px;color:#555">
-            Assinatura do Administrador local
+          <td style="width:50%;padding:6px 10px 8px;text-align:center;font-size:11px;color:#555">
+            ${sigB64?`<img src="${sigB64}" style="max-height:70px;max-width:100%;display:block;margin:0 auto 4px">`:`<div style="height:70px"></div>`}
+            <div style="border-top:1.5px solid #0f2744;padding-top:6px">Assinatura do Administrador local</div>
           </td>
           <td style="width:50%;padding:40px 10px 8px;border-top:1.5px solid #0f2744;text-align:center;font-size:11px;color:#555">
             Assinatura do Técnico responsável<br>
