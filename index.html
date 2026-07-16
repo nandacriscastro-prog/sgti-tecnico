@@ -533,7 +533,20 @@ function iniciarApp(nomeOuEmail){
 
 /* ── NAVEGAÇÃO ── */
 const SCREENS=['home','os','hist','s1','s2','s3','s4'];
+try{ history.replaceState({screen:'home'}, '', ''); }catch(e){}
+window.addEventListener('popstate', function(e){
+  if(e.state && e.state.screen){
+    irReal(e.state.screen);
+  }else{
+    irReal('home');
+    try{ history.pushState({screen:'home'}, '', ''); }catch(err){}
+  }
+});
 function ir(id){
+  try{ history.pushState({screen:id}, '', ''); }catch(e){}
+  irReal(id);
+}
+function irReal(id){
   SCREENS.forEach(s=>{ const el=q('sc-'+s);if(el)el.style.display='none';});
   if(id==='s3'){setTimeout(sigInit,50);}
   const el=q('sc-'+id);if(el)el.style.display=['s1','s2','s3','s4'].includes(id)?'flex':['os','hist'].includes(id)?'block':'block';
@@ -983,18 +996,31 @@ function addSlot(gridId,tipo){
 }
 function capturar(slot,tipo,gridId){
   const inp=document.createElement('input');
-  inp.type='file';inp.accept='image/*';
+  inp.type='file';inp.accept='image/*';inp.multiple=true;
   inp.onchange=function(){
-    if(!this.files[0])return;
-    const r=new FileReader();
-    r.onload=e=>{
-      slot.className='ps ok';
-      slot.innerHTML=`<img src="${e.target.result}"><button class="rm" onclick="rmFoto(event,this.parentElement,'${tipo}','${gridId}')">×</button>`;
-      slot.onclick=null;
-      atualizarBadgeFoto(tipo);
-      atualizarBarraPendencias();
-      addSlot(gridId,tipo);
-    };r.readAsDataURL(this.files[0]);
+    const files=Array.from(this.files||[]);
+    if(!files.length)return;
+    files.forEach((file,i)=>{
+      let targetSlot;
+      if(i===0){
+        targetSlot=slot;
+      }else{
+        // cria um novo slot vazio pra cada foto extra e usa ele
+        addSlot(gridId,tipo);
+        const g=q(gridId);
+        const slots=g?g.querySelectorAll('.ps'):[];
+        targetSlot=slots[slots.length-1];
+      }
+      const r=new FileReader();
+      r.onload=e=>{
+        targetSlot.className='ps ok';
+        targetSlot.innerHTML=`<img src="${e.target.result}"><button class="rm" onclick="rmFoto(event,this.parentElement,'${tipo}','${gridId}')">×</button>`;
+        targetSlot.onclick=null;
+        atualizarBadgeFoto(tipo);
+        atualizarBarraPendencias();
+        if(i===files.length-1)addSlot(gridId,tipo);
+      };r.readAsDataURL(file);
+    });
   };inp.click();
 }
 function rmFoto(e,slot,tipo,gridId){
