@@ -1332,6 +1332,9 @@ async function finalizarOS(){
   btn.innerHTML=spinner()+' Enviando...';btn.disabled=true;
   try{
     const o=OS_ATUAL;if(!o)throw new Error('Nenhuma OS selecionada.');
+    if(!(typeof sigGetBase64==='function'&&sigGetBase64())){
+      throw new Error('É obrigatório colher a assinatura do responsável local antes de concluir a OS.');
+    }
     const emailTec=(()=>{try{const s=JSON.parse(localStorage.getItem('geasi_ses'));return s.nome||s.email||SESSION?.nome||'Técnico';}catch(e){return'Técnico';}})();
     const ncs=Object.entries(CL_EST).filter(([,v])=>v==='nc').map(([k])=>k);
     const confs=Object.entries(CL_EST).filter(([,v])=>v==='conf').map(([k])=>k);
