@@ -1080,7 +1080,7 @@ function addPeca(wrapId,codPre='',descPre=''){
   const tipos=detectarTipo(OS_ATUAL?.servico||'');
   const gruposPermitidos=new Set(tipos.flatMap(t=>GRUPOS_POR_TIPO[t]||[]));
   const itensFiltrados=gruposPermitidos.size?ITENS_DEMANDA.filter(it=>gruposPermitidos.has(it.grp)):ITENS_DEMANDA;
-  const opts=itensFiltrados.map(it=>`<option value="${it.cod}|${it.desc}">[${it.cod}] ${it.desc} (${it.grp})</option>`).join('');
+  const opts=itensFiltrados.map(it=>`<option value="${it.cod}|${it.desc}"${it.cod===codPre?' selected':''}>[${it.cod}] ${it.desc} (${it.grp})</option>`).join('');
   const d=h('div','peca-card','');d.id=pid;
   d.innerHTML=`<div class="peca-card-hd">Componente
     <button onclick="document.getElementById('${pid}').remove();gerarResumo();salvarRascunho();" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;line-height:1">×</button>
@@ -1124,6 +1124,7 @@ function addPeca(wrapId,codPre='',descPre=''){
   wrap.appendChild(d);
   gerarResumo();
   salvarRascunho();
+  return pid;
 }
 function toggleNA(cb,inputId){
   const inp=q(inputId);if(!inp)return;
@@ -1167,7 +1168,20 @@ function gerarResumo(){
 function salvarRascunho(){
   if(!OS_ATUAL)return;
   try{
-    const d={numero:OS_ATUAL.numero,cl:CL_EST,
+    const pecasPorItem={};
+    document.querySelectorAll('[id^="pw-"]').forEach(wrap=>{
+      const k=wrap.id.slice(3);
+      const itens=[...wrap.querySelectorAll('.peca-card')].map(pc=>({
+        cod:pc.querySelector('.pc-sel')?.value?.split('|')[0]||'',
+        desc:pc.querySelector('.pc-n')?.value||'',
+        marca:pc.querySelector('.pc-marca')?.value||'',
+        modelo:pc.querySelector('.pc-modelo')?.value||'',
+        serie:pc.querySelector('.pc-serie')?.value||'',
+        qtd:pc.querySelector('.pc-qtd')?.value||'1'
+      })).filter(p=>p.desc);
+      if(itens.length)pecasPorItem[k]=itens;
+    });
+    const d={numero:OS_ATUAL.numero,cl:CL_EST,pecasPorItem,
       sv_det:v('sv-det'),sv_sol:v('sv-sol'),sv_pend:v('sv-pend'),sv_pend_desc:v('sv-pend-desc'),sv_gar:v('sv-gar'),
       sv_ini:v('sv-ini'),sv_fim:v('sv-fim'),sv_dias:v('sv-dias'),sv_km:v('sv-km'),
       me_rede:v('me-rede'),me_nb:v('me-nb'),me_24:v('me-24'),me_5:v('me-5'),me_emm:v('me-emm'),
@@ -1187,7 +1201,22 @@ function carregarRascunho(){
     ].forEach(([id,val])=>{const el=q(id);if(el&&val!=null)el.value=val;});
     if(d.sv_pend==='sim'){const f=q('sv-pend-f');if(f)f.style.display='block';}
     if(d.cl)Object.entries(d.cl).forEach(([k,val])=>{if(val)setCL(k,val);});
-    if(d.sv_det)q('sv-det').dataset.editado='1';
+    // Restaura as peças de cada item NC (não só o texto congelado) pra o resumo continuar automático
+    if(d.pecasPorItem){
+      Object.entries(d.pecasPorItem).forEach(([k,itens])=>{
+        const wrapId='pw-'+k;
+        if(!q(wrapId))return;
+        itens.forEach(p=>{
+          const pid=addPeca(wrapId,p.cod,p.desc);
+          if(!pid)return;
+          if(p.marca)q('im-'+pid)&&(q('im-'+pid).value=p.marca);
+          if(p.modelo)q('imo-'+pid)&&(q('imo-'+pid).value=p.modelo);
+          if(p.serie)q('is-'+pid)&&(q('is-'+pid).value=p.serie);
+          const card=q(pid);if(card&&p.qtd){const qi=card.querySelector('.pc-qtd');if(qi)qi.value=p.qtd;}
+        });
+      });
+      gerarResumo();
+    }
   }catch(e){}
 }
 // Auto-save
